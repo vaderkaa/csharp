@@ -1,12 +1,12 @@
 ### Polecenia gita po kolei:
-`dotnet new console` – tworzy szkielet aplikacji.
-`dotnet new gitignore` – natychmiast generuje plik blokujący wysyłanie "śmieci" (skompilowanych plików tymczasowych).
-`git init` – tworzy lokalne repozytorium w tym folderze.
-`git add .` – dodaje pliki do poczekalni (dzięki .gitignore wejdzie tylko czysty kod).
-`git commit -m "Inicjalizacja"` – zatwierdza pliki w lokalnej historii.
-`git remote add origin <link>` – łączy lokalny projekt z pustym miejscem na GitHubie.
-`git branch -M main` – ustala domyślną nazwę głównej gałęzi.
-`git push -u origin main` – wysyła wszystko na serwer.
+1. `dotnet new console` – tworzy szkielet aplikacji.
+2. `dotnet new gitignore` – natychmiast generuje plik blokujący wysyłanie "śmieci" (skompilowanych plików tymczasowych).
+3. `git init` – tworzy lokalne repozytorium w tym folderze.
+4. `git add .` – dodaje pliki do poczekalni (dzięki .gitignore wejdzie tylko czysty kod).
+5. `git commit -m "Inicjalizacja"` – zatwierdza pliki w lokalnej historii.
+6. `git remote add origin <link>` – łączy lokalny projekt z pustym miejscem na GitHubie.
+7. `git branch -M main` – ustala domyślną nazwę głównej gałęzi.
+8. `git push -u origin main` – wysyła wszystko na serwer.
 
 ### Tworzenie aplikacji .NET:
 1. `dotnet new sln -n PrimeChecker` - Tworzy pusty plik nowej solucji.
