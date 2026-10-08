@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "PrimeChecker.App/1.0.0": {
+        "dependencies": {
+          "PrimeChecker.Lib": "1.0.0"
+        },
+        "runtime": {
+          "PrimeChecker.App.dll": {}
+        }
+      },
+      "PrimeChecker.Lib/1.0.0": {
+        "runtime": {
+          "PrimeChecker.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PrimeChecker.App/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PrimeChecker.Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

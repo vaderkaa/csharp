@@ -1,0 +1,97 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {
+      "GeometryTools.Lib/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/GeometryTools.Lib.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GeometryTools.Lib.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GeometryTools.Lib/1.0.0": {
+      "type": "project",
+      "path": "../GeometryTools.Lib/GeometryTools.Lib.csproj",
+      "msbuildProject": "../GeometryTools.Lib/GeometryTools.Lib.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "GeometryTools.Lib >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\jadzi\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\jadzi\\Desktop\\p3\\lab1\\tutorial\\GeometryTools.App\\GeometryTools.App.csproj",
+      "projectName": "GeometryTools.App",
+      "projectPath": "C:\\Users\\jadzi\\Desktop\\p3\\lab1\\tutorial\\GeometryTools.App\\GeometryTools.App.csproj",
+      "packagesPath": "C:\\Users\\jadzi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\jadzi\\Desktop\\p3\\lab1\\tutorial\\GeometryTools.App\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\jadzi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {
+            "C:\\Users\\jadzi\\Desktop\\p3\\lab1\\tutorial\\GeometryTools.Lib\\GeometryTools.Lib.csproj": {
+              "projectPath": "C:\\Users\\jadzi\\Desktop\\p3\\lab1\\tutorial\\GeometryTools.Lib\\GeometryTools.Lib.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.318/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\bin\Debug\net9.0\GeometryTools.Lib.deps.json
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\bin\Debug\net9.0\GeometryTools.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\bin\Debug\net9.0\GeometryTools.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.AssemblyInfoInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.AssemblyInfo.cs
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.csproj.CoreCompileInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\refint\GeometryTools.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\GeometryTools.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\tutorial\GeometryTools.Lib\obj\Debug\net9.0\ref\GeometryTools.Lib.dll

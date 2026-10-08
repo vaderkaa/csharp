@@ -1,0 +1,11 @@
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\bin\Debug\net9.0\TemperatureConverter.Lib.deps.json
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\bin\Debug\net9.0\TemperatureConverter.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\bin\Debug\net9.0\TemperatureConverter.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.AssemblyInfoInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.AssemblyInfo.cs
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.csproj.CoreCompileInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\refint\TemperatureConverter.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\TemperatureConverter.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\zadanie1\TemperatureConverter.Lib\obj\Debug\net9.0\ref\TemperatureConverter.Lib.dll

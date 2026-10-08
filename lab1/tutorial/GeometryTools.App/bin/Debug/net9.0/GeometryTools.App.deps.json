@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "GeometryTools.App/1.0.0": {
+        "dependencies": {
+          "GeometryTools.Lib": "1.0.0"
+        },
+        "runtime": {
+          "GeometryTools.App.dll": {}
+        }
+      },
+      "GeometryTools.Lib/1.0.0": {
+        "runtime": {
+          "GeometryTools.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GeometryTools.App/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GeometryTools.Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

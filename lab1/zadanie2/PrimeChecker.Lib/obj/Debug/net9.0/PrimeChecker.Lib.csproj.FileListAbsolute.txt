@@ -1,0 +1,11 @@
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\bin\Debug\net9.0\PrimeChecker.Lib.deps.json
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\bin\Debug\net9.0\PrimeChecker.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\bin\Debug\net9.0\PrimeChecker.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.AssemblyInfoInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.AssemblyInfo.cs
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.csproj.CoreCompileInputs.cache
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\refint\PrimeChecker.Lib.dll
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\PrimeChecker.Lib.pdb
+C:\Users\jadzi\Desktop\p3\lab1\zadanie2\PrimeChecker.Lib\obj\Debug\net9.0\ref\PrimeChecker.Lib.dll
