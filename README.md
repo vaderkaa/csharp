@@ -23,16 +23,16 @@
 12. `dotnet test`
 
 ### Asercje
-`Assert.AreEqual(expected, actual);`
-`Assert.AreEqual(expected, actual, delta); // for float comparisons`
-`Assert.IsTrue(condition);`
-`Assert.IsFalse(condition);`
-`Assert.IsNull(value);`
-`Assert.IsNotNull(value);`
+`Assert.AreEqual(expected, actual);`  
+`Assert.AreEqual(expected, actual, delta); // for float comparisons`  
+`Assert.IsTrue(condition);`  
+`Assert.IsFalse(condition);`  
+`Assert.IsNull(value);`  
+`Assert.IsNotNull(value);`  
 
 ### Nazwa testu
-Nazwa testu powinna możliwie dokładnie opisywać sprawdzany przypadek. Jedną z popularnych konwencji jest:
-`NazwaMetody_Scenariusz_OczekiwanyWynik`
-Na przykład:
-`CalculateArea_ValidDimensions_ReturnsCorrectArea`
-`CalculateArea_OneSideIsZero_ReturnsZero`
+Nazwa testu powinna możliwie dokładnie opisywać sprawdzany przypadek. Jedną z popularnych konwencji jest:  
+`NazwaMetody_Scenariusz_OczekiwanyWynik`  
+Na przykład:  
+`CalculateArea_ValidDimensions_ReturnsCorrectArea`  
+`CalculateArea_OneSideIsZero_ReturnsZero`  
