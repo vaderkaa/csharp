@@ -32,7 +32,8 @@
 
 ### Nazwa testu
 Nazwa testu powinna możliwie dokładnie opisywać sprawdzany przypadek. Jedną z popularnych konwencji jest:  
-`NazwaMetody_Scenariusz_OczekiwanyWynik`  
+`NazwaMetody_Scenariusz_OczekiwanyWynik`
+
 Na przykład:  
 `CalculateArea_ValidDimensions_ReturnsCorrectArea`  
 `CalculateArea_OneSideIsZero_ReturnsZero`  
