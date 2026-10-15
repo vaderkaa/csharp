@@ -1,3 +1,5 @@
+# Notatki
+
 ### Polecenia gita po kolei:
 1. `dotnet new console` – tworzy szkielet aplikacji.
 2. `dotnet new gitignore` – natychmiast generuje plik blokujący wysyłanie "śmieci" (skompilowanych plików tymczasowych).
