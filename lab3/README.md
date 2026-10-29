@@ -29,13 +29,13 @@ Warunek: Obiekt to "czarna dziura" – tylko przyjmuje dane do obróbki (jako pa
 class Owoc { }
 class Jablko : Owoc { }
 
-// 1. Interfejs z 'in' - gwarantuje, że obiekty do myjni tylko WCHODZĄ
+// Interfejs z 'in' - gwarantuje, że obiekty do myjni tylko WCHODZĄ
 interface IMyjnia<in T> 
 { 
     void Umyj(T obiekt); 
 }
 
-// 2. Kompletny kod uniwersalnej myjni (potrafi umyć absolutnie KAŻDY Owoc)
+// Kompletny kod uniwersalnej myjni (potrafi umyć absolutnie KAŻDY Owoc)
 class MyjniaOwocow : IMyjnia<Owoc> 
 { 
     public void Umyj(Owoc o) { Console.WriteLine("Myję owoc!"); } 
@@ -47,8 +47,7 @@ void WypucujMojeJablko(IMyjnia<Jablko> myjniaTylkoDlaJablek)
     myjniaTylkoDlaJablek.Umyj(new Jablko());
 }
 
-// MAIN:
-// Tworzysz uniwersalną myjnię do wszystkich owoców
+// MAIN: Tworzysz uniwersalną myjnię do wszystkich owoców
 IMyjnia<Owoc> uniwersalnaMyjnia = new MyjniaOwocow();
 
 // ZADZIAŁA: Skoro uniwersalna myjnia umyje dowolny owoc, poradzi sobie z Jabłkiem
