@@ -373,6 +373,8 @@ Jak to się ma do [.., { Value: < 0 }] z poprzedniego zadania?
 W tamtym zadaniu użyliśmy dwóch kropek we wzorcach list wewnątrz instrukcji switch. Tam kropki pełnią funkcję "worka na resztę".
 Kiedy program widzi filtr napisany jako [.., { Value: < 0 }], kropki na początku oznaczają: "Zignoruj dowolną liczbę elementów na starcie (może być ich 0, a może być 1000), po prostu przewiń to do przodu i skup się tylko na ostatnim elemencie w nawiasach".
 
+# Dictionary
+
 Słownik (Dictionary<TKey, TValue>) to odpowiednik biurowej szafki na dokumenty. Każda szufladka w tej szafce musi mieć przyklejoną absolutnie unikalną naklejkę (Klucz / Key), pod którą kryje się konkretna zawartość (Wartość / Value).
 Najważniejsze właściwości (Stan słownika)
  * .Count – Zwraca liczbę zajętych szufladek w szafce.
@@ -397,7 +399,6 @@ Przeglądanie (Pętle)
    * kvp.Key (czytasz naklejkę)
    * kvp.Value (czytasz zawartość)
 
-To doskonałe spostrzeżenie. Trafiłaś właśnie na jeden z najczęstszych problemów, z którymi zderzają się programiści C#.
 Kiedy robisz foreach (var kvp in slownik), napotykasz dwie blokady:
  * Zmienna kvp jest tylko do odczytu: Nie możesz napisać kvp.Value = 10;. Dlaczego? Bo kvp to tylko kartka, na której komputer przepisał Ci to, co widział w szafce. Zmiana liczby na tej kartce nie zmieniłaby magicznie zawartości prawdziwej szuflady.
  * Zakaz przebudowy mebla: Jeśli w trakcie trwania pętli foreach spróbujesz dołożyć do szafki nową szufladkę (Add) albo jakąś wyrwać (Remove), C# natychmiast wywali krytyczny błąd (InvalidOperationException: Collection was modified). Zasada brzmi: Nie możesz przebudowywać szafki, podczas gdy pętla jest w trakcie jej inwentaryzacji.
@@ -413,6 +414,8 @@ foreach (var kvp in slownik) {
 
 Sposób 2: Pancerna metoda na wszystko (Usuwanie, Dodawanie, Zmienianie)
 Jeśli chcesz w trakcie pętli swobodnie usuwać stare czujniki, dodawać nowe albo robić totalną demolkę w słowniku, musisz użyć triku z klonowaniem listy naklejek. Służy do tego dopisek .ToList().
+
+```csharp
 // Pobieramy same naklejki i robimy ich ksero do osobnej listy (.ToList)
 foreach (var klucz in slownik.Keys.ToList()) {
     
@@ -423,5 +426,6 @@ foreach (var klucz in slownik.Keys.ToList()) {
     slownik.Remove(klucz); // Usunięcie szufladki
     slownik.Add("Nowy Czujnik", 0); // Dodanie nowej szufladki
 }
+```
 
 Dzięki .ToList() robisz sobie "zdjęcie" wszystkich naklejek przed rozpoczęciem pracy. Pętla czyta z tego ksera, więc główna szafka jest całkowicie odblokowana i możesz na niej wykonywać dowolne operacje.
