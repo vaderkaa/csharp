@@ -59,6 +59,7 @@ WypucujMojeJablko(uniwersalnaMyjnia);
 # Rekordy
 
 **1. Co to jest `record`?**
+
 To skrót składniowy do tworzenia paczek na dane. Piszesz jedną linijkę, a kompilator odwala czarną robotę. Sam w tle pisze dla Ciebie:
 
 * Konstruktor.
@@ -141,6 +142,7 @@ public int CompareTo(Package? other) {
 ```
 
 **1. Kierunek sortowania (Złota zasada)**
+
 Algorytm domyślnie sortuje rosnąco, więc sterujesz nim, po prostu odwracając kolejność zmiennych w kodzie:
 
 Rosnąco (A-Z, 1-10): Pytasz "JA do NIEGO"   
@@ -150,6 +152,7 @@ Malejąco (Z-A, 10-1): Pytasz "ON do MNIE" (zamieniasz miejscami)
 `return other.Rozmiar.CompareTo(this.Rozmiar);`
 
 **2. Odporność na Nulle (Kto przeżyje, a kto wybuchnie)**
+
 Zasada nadrzędna: null jest "najmniejszy" (przegrywa ze wszystkim).
 
 Wybucha (Brak odporności): `obiekt.CompareTo(inny)`   
@@ -159,6 +162,7 @@ Kuloodporne (Pełna odporność): `string.Compare(a, b)`
 Metoda statyczna bezpiecznie przyjmuje nulle i nic nie wybucha. Dodatkowo pozwala wstawić flagę np. `StringComparison.InvariantCultureIgnoreCase`, by ignorować wielkość liter.
 
 **3. Dwa interfejsy (Kto ocenia)**
+
 `IComparable<T>` (Zdolność wrodzona / Czarna skrzynka):   
 Klasa potrafi posortować się sama. Skoro kod wykonuje się wewnątrz niej (`this`), to Ty na 100% istniejesz. Sprawdzasz tylko przeciwnika:   
 `if (other is null) return 1;` (Ja > Pustka).
@@ -170,6 +174,7 @@ Zupełnie osobna klasa-sędzia. Sędzia dostaje `x` i `y` z zewnątrz. Musi zabe
 `if (y is null) return 1;` (prawy przegrywa)
 
 **4. Łączenie reguł (Kaskada przy remisie)**
+
 Jeśli sortujesz po kilku cechach (np. najpierw rozmiar, potem nazwa), drugą cechę sprawdzasz tylko wtedy, gdy pierwsza zwróciła 0:
 
 ```csharp
