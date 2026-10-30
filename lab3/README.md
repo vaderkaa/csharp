@@ -115,3 +115,65 @@ public string AnalizujOdczyty(List<double> odczyty)
 * `var x` – wyciąga wartość z tablicy w locie do zmiennej x.
 * `when` – dodaje klasyczny warunek logiczny po udanym dopasowaniu długości.
 * `_ (przed => "other")` – domyślny default, wyłapuje wszystko, co zostało.
+
+# Porównywanie elementów kolekcji
+
+Polecenie: "bigger packages should come before smaller - if packages have the same size order by Name".
+
+Tam będziesz musiała zaimplementować tzw. logikę zapasową (fallback), która ratuje sytuację podczas remisu:
+
+```csharp
+public int CompareTo(Package? other) {
+    if (other is null) return 1;
+
+    // KROK 1: Sortujemy po rozmiarze (MALEJĄCO, bo większe mają być pierwsze - dlatego other jest z przodu!)
+    int wynik = other.DownloadKb.CompareTo(this.DownloadKb);
+    
+    // Jeśli nie ma remisu (wynik jest różny od zera), od razu wiemy kto wygrał. Koniec roboty.
+    if (wynik != 0) {
+        return wynik;
+    }
+
+    // KROK 2: Skoro procesor doszedł aż tutaj, znaczy że był remis w rozmiarze (wynik = 0).
+    // Wkracza zasada zapasowa - decyduje nazwa.
+    return string.Compare(this.Name, other.Name, StringComparison.InvariantCultureIgnoreCase);
+}
+```
+
+1. Kierunek sortowania (Złota zasada)
+Algorytm domyślnie sortuje rosnąco, więc sterujesz nim, po prostu odwracając kolejność zmiennych w kodzie:
+
+Rosnąco (A-Z, 1-10): Pytasz "JA do NIEGO"   
+`return this.Wiek.CompareTo(other.Wiek);`
+
+Malejąco (Z-A, 10-1): Pytasz "ON do MNIE" (zamieniasz miejscami)   
+`return other.Rozmiar.CompareTo(this.Rozmiar);`
+
+2. Odporność na Nulle (Kto przeżyje, a kto wybuchnie)
+Zasada nadrzędna: null jest "najmniejszy" (przegrywa ze wszystkim).
+
+Wybucha (Brak odporności): `obiekt.CompareTo(inny)`   
+Uderzenie w kropkę po pustej zmiennej to pewny `NullReferenceException`. Zawsze musisz najpierw sprawdzić: `if (obiekt is null)`.
+
+Kuloodporne (Pełna odporność): `string.Compare(a, b)`   
+Metoda statyczna bezpiecznie przyjmuje nulle i nic nie wybucha. Dodatkowo pozwala wstawić flagę np. `StringComparison.InvariantCultureIgnoreCase`, by ignorować wielkość liter.
+
+3. Dwa interfejsy (Kto ocenia)
+`IComparable<T>` (Zdolność wrodzona / Czarna skrzynka):   
+Klasa potrafi posortować się sama. Skoro kod wykonuje się wewnątrz niej (`this`), to Ty na 100% istniejesz. Sprawdzasz tylko przeciwnika:   
+`if (other is null) return 1;` (Ja > Pustka).
+
+`IComparer<T>` (Zewnętrzny sędzia):   
+Zupełnie osobna klasa-sędzia. Sędzia dostaje `x` i `y` z zewnątrz. Musi zabezpieczyć obie strony:   
+`if (ReferenceEquals(x, y)) return 0;` (remis / oba to null)
+`if (x is null) return -1;` (lewy przegrywa)
+`if (y is null) return 1;` (prawy przegrywa)
+
+4. Łączenie reguł (Kaskada przy remisie)
+Jeśli sortujesz po kilku cechach (np. najpierw rozmiar, potem nazwa), drugą cechę sprawdzasz tylko wtedy, gdy pierwsza zwróciła 0:
+
+```csharp
+int wynik = other.Rozmiar.CompareTo(this.Rozmiar); // Malejąco
+if (wynik != 0) return wynik;                      // Mamy zwycięzcę
+return string.Compare(this.Name, other.Name);      // Remis? Decyduje nazwa
+```
