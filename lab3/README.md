@@ -223,3 +223,53 @@ public class PersonByAgeAscending : Comparer<Person> {
     public override int Compare(Person? a, Person? b) { ... }
 }
 ```
+
+Oto jak wyglądałby kod w `Main` (głównym programie) i jak krok po kroku współpracuje on z Twoją nową maszyną z zadania.
+
+Zapiszmy w `Main` takie wywołanie: chcemy **3 odczyty** z czujnika "Termometr", zaczynając od wartości **20.0** i godziny **12:00**.
+
+```csharp
+// 1. Ustawienie maszyny na hali (nic się jeszcze nie produkuje!)
+var mojeOdczyty = T2.Repeat("Termometr", 20.0, 3, new DateTime(2026, 1, 1, 12, 0, 0));
+
+// 2. Szef przychodzi i zaczyna ciągnąć za dźwignię
+foreach (var odczyt in mojeOdczyty) {
+    Console.WriteLine($"Czujnik: {odczyt.Sensor}, Wynik: {odczyt.Value}, Czas: {odczyt.At}");
+}
+
+```
+
+A teraz co dokładnie robi procesor (nasz ping-pong między `Main` a `T2`):
+
+**KROK 1: Tylko obietnica**
+Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w ogóle nie startuje. Przekazałeś jej nazwę, wartość startową, limit (`count`) i czas startowy, ale na razie maszyna tylko czeka w gotowości. Pamięć RAM jest pusta.
+
+**KROK 2: "Daj pierwszy!" (Obieg 1)**
+
+* **[Main]** Program wchodzi w pętlę `foreach`. Pętla krzyczy do maszyny: *"Daj pierwszy odczyt!"*
+* **[T2]** Maszyna się włącza. Ustawia sobie w środku zmienne robocze. Robi pierwszy obieg pętli `for` i skleja odczyt: `Termometr, 20.0, 12:00`. Robi `yield return`, wypluwa ten odczyt na taśmę i **zamraża się**.
+* **[Main]** Program bierze z taśmy odczyt i wypisuje na ekran: `Czujnik: Termometr, Wynik: 20, Czas: 12:00`.
+
+**KROK 3: "Daj drugi!" (Obieg 2)**
+
+* **[Main]** Pętla kręci się dalej i krzyczy: *"Daj drugi!"*
+* **[T2]** Maszyna się odwiesza. Dodaje do swojego wewnętrznego zegara 2 minuty, a do wartości dodaje 0,2. Robi drugi obieg pętli `for` i skleja: `Termometr, 20.2, 12:02`. Wypluwa przez `yield return` i znowu **zamarza**.
+
+
+* **[Main]** Program bierze wynik i wypisuje: `Czujnik: Termometr, Wynik: 20.2, Czas: 12:02`.
+
+**KROK 4: "Daj trzeci!" (Obieg 3)**
+
+* **[Main]** Pętla krzyczy: *"Daj trzeci!"*
+* **[T2]** Maszyna się odwiesza. Znowu robi matematykę. Skleja: `Termometr, 20.4, 12:04`. Wypluwa i **zamarza**.
+* **[Main]** Program bierze wynik i wypisuje: `Czujnik: Termometr, Wynik: 20.4, Czas: 12:04`.
+
+**KROK 5: Koniec pracy**
+
+* **[Main]** Pętla krzyczy: *"Daj czwarty!"*
+* **[T2]** Maszyna się odwiesza, ale widzi, że limit `count` wynosił 3. Pętla `for` w maszynie dobiegła końca. Maszyna wyłącza się całkowicie i mówi pętli w `Main`: *"Koniec, taśma pusta"*.
+
+
+* **[Main]** Zewnętrzny `foreach` kończy działanie. Program idzie dalej.
+
+Słówko `yield` sprawia po prostu, że podpinasz swoją zewnętrzną pętlę `foreach` (w `Main`) bezpośrednio pod wewnętrzną pętlę `for` (w `T2`) i kręcą się one na zmianę, sztuka po sztuce.
