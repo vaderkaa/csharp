@@ -85,3 +85,33 @@ Ułamek sekundy później, gdy obiekt już powstanie, init zatrzaskuje kłódkę
 * Gdzie żyje: Na stosie (superszybki, zero GC).
 * Mutowalność: **Niemutowalny** (całkowicie zablokowany, modyfikator `init`).
 * Zastosowanie: Złoty środek dla silników gier i matematyki (np. wektory w Raytracerze). Masz maksymalną wydajność z pamięci podręcznej i 100% pewności, że żadna inna funkcja nie zmieni Ci przypadkiem koordynatów wektora w trakcie obliczeń.
+
+# Wzorce list i wycinków
+
+Najważniejsza zasada: Wyrażenie `switch` działa jak lejek (czyta z góry na dół).   
+Wygrywa pierwszy warunek, który pasuje, a reszta jest ignorowana. Dlatego układamy je od najbardziej szczegółowych (ścisła długość listy), do najbardziej ogólnych (jakiś element na początku/końcu).
+
+```csharp
+public string AnalizujOdczyty(List<double> odczyty)
+{
+    return odczyty switch
+    {
+        [] => "empty",                                // Dokładnie 0 elementów
+        [_] => "single",                              // Dokładnie 1 dowolny element
+        [var v1, var v2] when v1 < v2 => "pair-asc",  // Dokładnie 2 elementy (rosnąco)
+        [var v1, var v2] when v1 > v2 => "pair-desc", // Dokładnie 2 elementy (malejąco)
+        [var v1, var v2] when v1 == v2 => "pair-eq",  // Dokładnie 2 elementy (takie same)
+        [> 100, ..] => "starts-high",                 // Pierwszy to >100, a potem cokolwiek
+        [.., < 0] => "ends-low",                      // Cokolwiek na początku, ale ostatni to <0
+        _ => "other"                                  // Wszystko, co nie złapało się wyżej
+    };
+}
+```
+
+**Słownik pojęć:**
+* `[ ]` (klamry) – wyznaczają ścisłą długość kolekcji (jeśli nie ma w nich `..`).
+* `_` (wewnątrz klamer) – jeden dowolny element ("joker").
+* `..` (spread/wycinek) – połyka 0 lub więcej elementów. Mówi: "tutaj może być cokolwiek aż do końca/początku".
+* `var x` – wyciąga wartość z tablicy w locie do zmiennej x.
+* `when` – dodaje klasyczny warunek logiczny po udanym dopasowaniu długości.
+* `_ (przed => "other")` – domyślny default, wyłapuje wszystko, co zostało.
