@@ -200,3 +200,26 @@ Kiedy tego używasz?
 
 * Gdy klasa jest cudza i nie możesz jej edytować.
 * Gdy dla jednej klasy potrzebujesz wielu różnych sortowań. Raz chcesz posortować ludzi po wieku (wtedy dajesz sędziego PersonByAge), a w innej części programu po nazwisku (wtedy tworzysz drugiego sędziego PersonByName i wrzucasz go do Sort()). Zdolność "wrodzona" (IComparable) pozwala zdefiniować tylko jeden, domyślny sposób dla całego programu.
+
+**Klasa Comparer<T> zamiast interfejsu IComparer<T>**
+
+Dlaczego to oficjalnie zalecane?
+
+Interfejs (`IComparer<T>`) to tylko goły kontrakt. Jeśli go użyjesz, Twój sędzia dogada się tylko z nowoczesnymi, generycznymi listami.
+
+Klasa bazowa (`Comparer<T>`) to gotowy szablon od Microsoftu. W tle, całkowicie za darmo, dopisuje kod zapewniający kompatybilność wsteczną. Dzięki temu Twój sędzia obsłuży również przestarzałe kolekcje i kody napisane we wczesnych wersjach C#.
+
+Co się zmienia w kodzie?
+Cała matematyka i obsługa nulli w środku zostaje w 100% taka sama. Zmieniają się tylko dwa słowa w nagłówkach (usuwasz literkę "I" z nazwy oraz dodajesz `override`):
+
+```csharp
+// BYŁO (Goły interfejs):
+public class PersonByAgeAscending : IComparer<Person> {
+    public int Compare(Person? a, Person? b) { ... }
+}
+
+// JEST (Zalecana klasa bazowa):
+public class PersonByAgeAscending : Comparer<Person> {
+    public override int Compare(Person? a, Person? b) { ... }
+}
+```
