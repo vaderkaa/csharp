@@ -67,7 +67,7 @@ To skrót składniowy do tworzenia paczek na dane. Piszesz jedną linijkę, a ko
 
 **2. Trzy główne warianty (i różnice):**
 
-* **`record`** (domyślnie `record class`)
+**`record`** (domyślnie `record class`)
 * Gdzie żyje: Na stercie (obciąża Garbage Collectora).
 * Mutowalność: **Niemutowalny** (dane tylko do odczytu, modyfikator `init`).
 * Zastosowanie: Standardowe przesyłanie paczek danych (np. profil użytkownika).
@@ -76,14 +76,12 @@ To skrót składniowy do tworzenia paczek na dane. Piszesz jedną linijkę, a ko
 Pozwala ustawić wartość tylko w momencie powoływania obiektu do życia (gdy używasz słówka `new`).   
 Ułamek sekundy później, gdy obiekt już powstanie, init zatrzaskuje kłódkę na zawsze. Wartość staje się zablokowana i można ją tylko czytać.
 
-
-* **`record struct`**
+**`record struct`**
 * Gdzie żyje: Na stosie (superszybki, znika od razu, nie męczy GC).
 * Mutowalność: **Mutowalny!** (można mu podmieniać dane w locie przez `set`).
 * Zastosowanie: Matematyka, gry, generowanie milionów punktów na sekundę, gdy chcesz je w locie modyfikować.
 
-
-* **`readonly record struct`**
+**`readonly record struct`**
 * Gdzie żyje: Na stosie (superszybki, zero GC).
 * Mutowalność: **Niemutowalny** (całkowicie zablokowany, modyfikator `init`).
 * Zastosowanie: Złoty środek dla silników gier i matematyki (np. wektory w Raytracerze). Masz maksymalną wydajność z pamięci podręcznej i 100% pewności, że żadna inna funkcja nie zmieni Ci przypadkiem koordynatów wektora w trakcie obliczeń.
