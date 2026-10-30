@@ -1,3 +1,5 @@
+# Kowariancja i kontrawariancja
+
 ### Kowariancja (out — tylko WYJŚCIE)
 
 Zasada (Jabłka ➡️ Owoce): Pojemnik z Jabłkami możesz bezpiecznie traktować jako ogólny pojemnik z Owocami.
@@ -53,3 +55,35 @@ IMyjnia<Owoc> uniwersalnaMyjnia = new MyjniaOwocow();
 // ZADZIAŁA: Skoro uniwersalna myjnia umyje dowolny owoc, poradzi sobie z Jabłkiem
 WypucujMojeJablko(uniwersalnaMyjnia);
 ```
+
+# Rekordy
+
+**1. Co to jest `record`?**
+To skrót składniowy do tworzenia paczek na dane. Piszesz jedną linijkę, a kompilator odwala czarną robotę. Sam w tle pisze dla Ciebie:
+
+* Konstruktor.
+* Mądre sprawdzanie równości (`==` i `Equals` porównują *zawartość*, a nie fizyczne adresy w pamięci).
+* Ładne formatowanie tekstu w `ToString()`.
+
+**2. Trzy główne warianty (i różnice):**
+
+* **`record`** (domyślnie `record class`)
+* Gdzie żyje: Na stercie (obciąża Garbage Collectora).
+* Mutowalność: **Niemutowalny** (dane tylko do odczytu, modyfikator `init`).
+* Zastosowanie: Standardowe przesyłanie paczek danych (np. profil użytkownika).
+
+`init` (od initialize, czyli inicjuj) to rygorystyczna alternatywa dla set. Działa jak szybkoschnący beton:   
+Pozwala ustawić wartość tylko w momencie powoływania obiektu do życia (gdy używasz słówka `new`).   
+Ułamek sekundy później, gdy obiekt już powstanie, init zatrzaskuje kłódkę na zawsze. Wartość staje się zablokowana i można ją tylko czytać.
+
+
+* **`record struct`**
+* Gdzie żyje: Na stosie (superszybki, znika od razu, nie męczy GC).
+* Mutowalność: **Mutowalny!** (można mu podmieniać dane w locie przez `set`).
+* Zastosowanie: Matematyka, gry, generowanie milionów punktów na sekundę, gdy chcesz je w locie modyfikować.
+
+
+* **`readonly record struct`**
+* Gdzie żyje: Na stosie (superszybki, zero GC).
+* Mutowalność: **Niemutowalny** (całkowicie zablokowany, modyfikator `init`).
+* Zastosowanie: Złoty środek dla silników gier i matematyki (np. wektory w Raytracerze). Masz maksymalną wydajność z pamięci podręcznej i 100% pewności, że żadna inna funkcja nie zmieni Ci przypadkiem koordynatów wektora w trakcie obliczeń.
