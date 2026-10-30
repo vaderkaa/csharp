@@ -182,3 +182,21 @@ int wynik = other.Rozmiar.CompareTo(this.Rozmiar); // Malejąco
 if (wynik != 0) return wynik;                      // Mamy zwycięzcę
 return string.Compare(this.Name, other.Name);      // Remis? Decyduje nazwa
 ```
+
+```csharp
+// if I don't own Person, but still need to order them by age in some collection
+public class PersonByAgeAscending : IComparer<Person> {
+    public int Compare(Person? a, Person? b) {
+        if (a is null) return -1;
+        if (b is null) return 1;
+        return a.Age.CompareTo(b.Age);
+}
+
+List<Person> people = [ new("A", 30), new("B", 20) ];
+people.Sort(new PersonByAgeAscending());
+```
+
+Kiedy tego używasz?
+
+* Gdy klasa jest cudza i nie możesz jej edytować.
+* Gdy dla jednej klasy potrzebujesz wielu różnych sortowań. Raz chcesz posortować ludzi po wieku (wtedy dajesz sędziego PersonByAge), a w innej części programu po nazwisku (wtedy tworzysz drugiego sędziego PersonByName i wrzucasz go do Sort()). Zdolność "wrodzona" (IComparable) pozwala zdefiniować tylko jeden, domyślny sposób dla całego programu.
