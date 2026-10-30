@@ -224,6 +224,8 @@ public class PersonByAgeAscending : Comparer<Person> {
 }
 ```
 
+# Yield
+
 Oto jak wyglądałby kod w `Main` (głównym programie) i jak krok po kroku współpracuje on z Twoją nową maszyną z zadania.
 
 Zapiszmy w `Main` takie wywołanie: chcemy **3 odczyty** z czujnika "Termometr", zaczynając od wartości **20.0** i godziny **12:00**.
