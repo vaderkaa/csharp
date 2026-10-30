@@ -275,3 +275,57 @@ Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w
 * **[Main]** Zewnętrzny `foreach` kończy działanie. Program idzie dalej.
 
 Słówko `yield` sprawia po prostu, że podpinasz swoją zewnętrzną pętlę `foreach` (w `Main`) bezpośrednio pod wewnętrzną pętlę `for` (w `T2`) i kręcą się one na zmianę, sztuka po sztuce.
+
+# Nullowatość
+
+Jeśli ktoś przekaże do metody tablice, która jest nullem:
+```csharp
+int?[] tablica = new int?[5]; // Tworzymy tablicę na 5 elementów (kopert)
+
+// ŹLE: if (tablica.HasValue) -> Błąd kompilacji, tablice nie mają tego przełącznika!
+
+// DOBRZE: 
+// Najpierw upewniamy się, czy tablica (klasa) w ogóle istnieje
+if (tablica is not null) {
+    
+    // Teraz sprawdzamy, czy w kopercie nr 0 są dane, używając jej przełącznika
+    if (tablica[0].HasValue) {
+        Console.WriteLine(tablica[0].Value);
+    }
+}
+```
+
+**Typy wartościowe, klasy i sztuczne nulle w C#**
+
+* **Klasy (typy referencyjne np. tablice, `string`):** Zwykły `null` to fizyczny brak przypisanego miejsca w pamięci.
+* **Struktury (typy wartościowe np. `int`, `DateTime`, `Reading`):** Nigdy nie są nullem, zawsze trzymają wartość.
+* **Sztuczny null (`int?`, `Reading?`):** Znak zapytania owija strukturę w specjalną "kopertę" (typ `Nullable<T>`), pozwalając udawać, że zmienna jest pusta.
+
+**Jak działa "koperta" (typy z `?`):**
+Każda koperta ma wbudowane dwie właściwości:
+
+* `.HasValue` (typ `bool`): `true` jeśli w środku faktycznie są dane, `false` jeśli to sztuczny null.
+* `.Value`: fizyczne wyciągnięcie danych z koperty. (Wyciąganie, gdy `HasValue` to `false`, wywala krytyczny błąd programu).
+
+**Kiedy używać `.Value`, a kiedy samej zmiennej?**
+
+* **Sama zmienna (np. `Console.WriteLine(x)`):** Funkcje takie jak konsola są sprytne – same rozpakują kopertę i wypiszą wartość, a jeśli jest pusta, nic nie zrobią (nie wywalą błędu).
+* **Konieczność `.Value` (np. `int normalnaLiczba = x.Value;`):** Musisz użyć `.Value`, gdy chcesz przypisać zawartość koperty do zwykłej, "twardej" zmiennej bez znaku zapytania (np. `int` zamiast `int?`) albo użyć jej do ścisłych obliczeń matematycznych. Kompilator nie pozwoli włożyć "całej koperty" w miejsce, które przyjmuje tylko gołe liczby.
+
+**Sprawdzanie, czy nie ma nulla:**
+
+* **Klasyczne (dla kopert):** `if (liczba.HasValue)`
+* **Nowoczesne (uniwersalne):** `if (liczba is not null)` – działa wszędzie. Dla struktur kompilator i tak sam zamieni to pod spodem na sprawdzenie `.HasValue`.
+
+**Podwójna pułapka z tablicami (`int?[] tablica`)**
+Tu spotykają się dwa światy – klasa (tablica) i sztuczny null (szufladka z `?`).
+
+1. Sama zmienna `tablica` nie ma właściwości `.HasValue`, bo tablica to klasa. Sprawdzasz ją przez `if (tablica is not null)`.
+2. Wywołanie `int?[] tablica = new int?[5]` tworzy istniejący w pamięci obiekt (tablica już NIE JEST nullem), ale jej szufladki są z urzędu wypełnione pustymi kopertami (ich `HasValue` ustawione jest na `false`).
+
+**Krótki zapis – operator Elvisa (`?.` i `?[]`)**
+Pozwala przejść przez całą ścieżkę w locie, nie pisząc długich drabinek z `if`:
+
+```csharp
+int? bezpiecznyElement = tablica?[0];
+```
