@@ -68,21 +68,21 @@ To skrót składniowy do tworzenia paczek na dane. Piszesz jedną linijkę, a ko
 
 **2. Trzy główne warianty (i różnice):**
 
-**`record`** (domyślnie `record class`)
+`record` (domyślnie `record class`)
 * Gdzie żyje: Na stercie (obciąża Garbage Collectora).
 * Mutowalność: **Niemutowalny** (dane tylko do odczytu, modyfikator `init`).
 * Zastosowanie: Standardowe przesyłanie paczek danych (np. profil użytkownika).
 
-`init` (od initialize, czyli inicjuj) to rygorystyczna alternatywa dla set. Działa jak szybkoschnący beton:   
+`init` (od initialize, czyli inicjuj) to rygorystyczna alternatywa dla `set`. Działa jak szybkoschnący beton:   
 Pozwala ustawić wartość tylko w momencie powoływania obiektu do życia (gdy używasz słówka `new`).   
 Ułamek sekundy później, gdy obiekt już powstanie, init zatrzaskuje kłódkę na zawsze. Wartość staje się zablokowana i można ją tylko czytać.
 
-**`record struct`**
+`record struct`
 * Gdzie żyje: Na stosie (superszybki, znika od razu, nie męczy GC).
 * Mutowalność: **Mutowalny!** (można mu podmieniać dane w locie przez `set`).
 * Zastosowanie: Matematyka, gry, generowanie milionów punktów na sekundę, gdy chcesz je w locie modyfikować.
 
-**`readonly record struct`**
+`readonly record struct`
 * Gdzie żyje: Na stosie (superszybki, zero GC).
 * Mutowalność: **Niemutowalny** (całkowicie zablokowany, modyfikator `init`).
 * Zastosowanie: Złoty środek dla silników gier i matematyki (np. wektory w Raytracerze). Masz maksymalną wydajność z pamięci podręcznej i 100% pewności, że żadna inna funkcja nie zmieni Ci przypadkiem koordynatów wektora w trakcie obliczeń.
@@ -168,20 +168,10 @@ Klasa potrafi posortować się sama. Skoro kod wykonuje się wewnątrz niej (`th
 `if (other is null) return 1;` (Ja > Pustka).
 
 `IComparer<T>` (Zewnętrzny sędzia):   
-Zupełnie osobna klasa-sędzia. Sędzia dostaje `x` i `y` z zewnątrz. Musi zabezpieczyć obie strony:   
-`if (ReferenceEquals(x, y)) return 0;` (remis / oba to null)
-`if (x is null) return -1;` (lewy przegrywa)
-`if (y is null) return 1;` (prawy przegrywa)
-
-**4. Łączenie reguł (Kaskada przy remisie)**
-
-Jeśli sortujesz po kilku cechach (np. najpierw rozmiar, potem nazwa), drugą cechę sprawdzasz tylko wtedy, gdy pierwsza zwróciła 0:
-
-```csharp
-int wynik = other.Rozmiar.CompareTo(this.Rozmiar); // Malejąco
-if (wynik != 0) return wynik;                      // Mamy zwycięzcę
-return string.Compare(this.Name, other.Name);      // Remis? Decyduje nazwa
-```
+Zupełnie osobna klasa-sędzia. Sędzia dostaje `x` i `y` z zewnątrz. Musi zabezpieczyć obie strony:    
+`if (ReferenceEquals(x, y)) return 0;` (remis / oba to null)   
+`if (x is null) return -1;` (lewy przegrywa)   
+`if (y is null) return 1;` (prawy przegrywa)   
 
 ```csharp
 // if I don't own Person, but still need to order them by age in some collection
@@ -200,6 +190,16 @@ Kiedy tego używasz?
 
 * Gdy klasa jest cudza i nie możesz jej edytować.
 * Gdy dla jednej klasy potrzebujesz wielu różnych sortowań. Raz chcesz posortować ludzi po wieku (wtedy dajesz sędziego PersonByAge), a w innej części programu po nazwisku (wtedy tworzysz drugiego sędziego PersonByName i wrzucasz go do Sort()). Zdolność "wrodzona" (IComparable) pozwala zdefiniować tylko jeden, domyślny sposób dla całego programu.
+
+**4. Łączenie reguł (Kaskada przy remisie)**
+
+Jeśli sortujesz po kilku cechach (np. najpierw rozmiar, potem nazwa), drugą cechę sprawdzasz tylko wtedy, gdy pierwsza zwróciła 0:
+
+```csharp
+int wynik = other.Rozmiar.CompareTo(this.Rozmiar); // Malejąco
+if (wynik != 0) return wynik;                      // Mamy zwycięzcę
+return string.Compare(this.Name, other.Name);      // Remis? Decyduje nazwa
+```
 
 **Klasa Comparer<T> zamiast interfejsu IComparer<T>**
 
@@ -238,7 +238,6 @@ var mojeOdczyty = T2.Repeat("Termometr", 20.0, 3, new DateTime(2026, 1, 1, 12, 0
 foreach (var odczyt in mojeOdczyty) {
     Console.WriteLine($"Czujnik: {odczyt.Sensor}, Wynik: {odczyt.Value}, Czas: {odczyt.At}");
 }
-
 ```
 
 A teraz co dokładnie robi procesor (nasz ping-pong między `Main` a `T2`):
@@ -276,7 +275,7 @@ Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w
 
 Słówko `yield` sprawia po prostu, że podpinasz swoją zewnętrzną pętlę `foreach` (w `Main`) bezpośrednio pod wewnętrzną pętlę `for` (w `T2`) i kręcą się one na zmianę, sztuka po sztuce.
 
-# Nullowatość
+# Nullowalność
 
 Jeśli ktoś przekaże do metody tablice, która jest nullem:
 ```csharp
@@ -332,88 +331,97 @@ int? bezpiecznyElement = tablica?[0];
 
 # List
 
-Najważniejsze właściwości (Stan listy)
- * .Count – Zwraca fizyczną liczbę elementów, które aktualnie są w liście.
- * .Capacity – Zwraca wielkość "wewnętrznego pudełka" w pamięci RAM. Lista w C# pod spodem używa zwykłej tablicy. Gdy wbijasz do niej elementy i brakuje miejsca, lista po cichu tworzy dwukrotnie większą tablicę, przepina dane i wyrzuca starą (np. pojemność rośnie z 4 na 8, potem 16, 32).
- * [indeks] – Tradycyjny dostęp do szufladki, np. lista[0].
-Dodawanie elementów
- * .Add(element) – Dorzuca jedną rzecz na sam koniec listy.
- * .AddRange(kolekcja) – Dokleja na koniec całą inną listę lub tablicę naraz. Dużo szybsze niż robienie pętli z pojedynczym Add().
- * .Insert(indeks, element) – Wpycha element w konkretne miejsce (np. lista.Insert(0, x) wstawia na sam początek). To kosztowna operacja, bo komputer musi przesunąć całą resztę elementów w prawo.
-Usuwanie elementów
- * .Remove(element) – Szuka pierwszej sztuki podanego elementu i wyrzuca go z listy. Zwraca true, jeśli się udało, i false, jeśli takiego elementu nie było.
- * .RemoveAt(indeks) – Usuwa to, co leży w konkretnej szufladce (np. lista.RemoveAt(0)). Elementy po prawej stronie automatycznie przesuwają się w lewo, żeby załatać dziurę.
- * .RemoveAll(warunek) – Usuwa masowo wszystko, co spełnia Twój przepis, np. lista.RemoveAll(x => x < 0) wyrzuci wszystkie liczby ujemne.
- * .Clear() – Wyzerowuje listę. .Count spada do 0, ale .Capacity (pudełko w pamięci) zostaje na przyszłość, żeby nie marnować czasu na ponowne budowanie mebla.
-Wyszukiwanie i sprawdzanie
- * .Contains(element) – Zwraca true albo false. Odpowiada na pytanie: "Czy ten konkretny obiekt leży w środku?".
- * .IndexOf(element) – Przeszukuje listę od lewej i oddaje numer szufladki, w której leży element. Jeśli go nie znajdzie, zwraca -1.
- * .Find(warunek) – Oddaje pierwszy element, który pasuje do przepisu (np. lista.Find(x => x.Value > 100)).
- * .FindAll(warunek) – Oddaje nową, mniejszą listę, w której są tylko elementy spełniające warunek.
- * .Exists(warunek) – Zwraca true, jeśli jakikolwiek element w liście pasuje do warunku.
-Sortowanie i transformacje
- * .Sort() – Układa elementy rosnąco. Jeśli obiekty są złożone (np. Twoje czujniki), musisz mu podać przepis, jak ma je porównywać: lista.Sort((a, b) => a.At.CompareTo(b.At)).
- * .Reverse() – Odwraca kolejność wszystkich karteczek o 180 stopni (pierwsza staje się ostatnią).
- * .ToArray() – Zamraża listę. Kopiuje jej obecną zawartość i wypluwa jako twardą, niemodyfikowalną w rozmiarze tablicę (np. int[]). Przydatne, gdy musisz przekazać dane do funkcji, która nie przyjmuje list.
+**Najważniejsze właściwości (Stan listy):**
+
+**Właściwości**
+ * `.Count` – Zwraca fizyczną liczbę elementów, które aktualnie są w liście.
+ * `.Capacity` – Zwraca wielkość "wewnętrznego pudełka" w pamięci RAM. Lista w C# pod spodem używa zwykłej tablicy. Gdy wbijasz do niej elementy i brakuje miejsca, lista po cichu tworzy dwukrotnie większą tablicę, przepina dane i wyrzuca starą (np. pojemność rośnie z 4 na 8, potem 16, 32).
+ * `[indeks]` – Tradycyjny dostęp do szufladki, np. lista[0].
+**Dodawanie elementów**
+ * `.Add(element)` – Dorzuca jedną rzecz na sam koniec listy.
+ * `.AddRange(kolekcja)` – Dokleja na koniec całą inną listę lub tablicę naraz. Dużo szybsze niż robienie pętli z pojedynczym Add().
+ * `.Insert(indeks, element)` – Wpycha element w konkretne miejsce (np. lista.Insert(0, x) wstawia na sam początek). To kosztowna operacja, bo komputer musi przesunąć całą resztę elementów w prawo.
+**Usuwanie elementów**
+ * `.Remove(element)` – Szuka pierwszej sztuki podanego elementu i wyrzuca go z listy. Zwraca true, jeśli się udało, i false, jeśli takiego elementu nie było.
+ * `.RemoveAt(indeks)` – Usuwa to, co leży w konkretnej szufladce (np. lista.RemoveAt(0)). Elementy po prawej stronie automatycznie przesuwają się w lewo, żeby załatać dziurę.
+ * `.RemoveAll(warunek)` – Usuwa masowo wszystko, co spełnia Twój przepis, np. lista.RemoveAll(x => x < 0) wyrzuci wszystkie liczby ujemne.
+ * `.Clear()` – Wyzerowuje listę. .Count spada do 0, ale .Capacity (pudełko w pamięci) zostaje na przyszłość, żeby nie marnować czasu na ponowne budowanie mebla.
+**Wyszukiwanie i sprawdzanie**
+ * `.Contains(element)` – Zwraca true albo false. Odpowiada na pytanie: "Czy ten konkretny obiekt leży w środku?".
+ * `.IndexOf(element)` – Przeszukuje listę od lewej i oddaje numer szufladki, w której leży element. Jeśli go nie znajdzie, zwraca -1.
+ * `.Find(warunek)` – Oddaje pierwszy element, który pasuje do przepisu (np. lista.Find(x => x.Value > 100)).
+ * `.FindAll(warunek)` – Oddaje nową, mniejszą listę, w której są tylko elementy spełniające warunek.
+ * `.Exists(warunek)` – Zwraca true, jeśli jakikolwiek element w liście pasuje do warunku.
+**Sortowanie i transformacje**
+ * `.Sort()` – Układa elementy rosnąco. Jeśli obiekty są złożone (np. Twoje czujniki), musisz mu podać przepis, jak ma je porównywać: lista.Sort((a, b) => a.At.CompareTo(b.At)).
+ * `.Reverse()` – Odwraca kolejność wszystkich karteczek o 180 stopni (pierwsza staje się ostatnią).
+ * `.ToArray()` – Zamraża listę. Kopiuje jej obecną zawartość i wypluwa jako twardą, niemodyfikowalną w rozmiarze tablicę (np. int[]). Przydatne, gdy musisz przekazać dane do funkcji, która nie przyjmuje list.
 
 Te znaczki to tzw. indeksy od końca (^) oraz wycinki (..). Zostały dodane w nowszym C#, żeby ułatwić wybieranie elementów z list i tablic bez pisania długich równań matematycznych.
 Daszek (^) – Odliczanie od końca
-Zamiast pisać długie matematyczne obliczenia, żeby dostać się do ostatnich elementów na liście, używasz daszka. Zastępuje on klasyczne lista.Count - x.
- * lista[^1] – oznacza "pierwszy element od końca" (czyli dosłownie ostatni). To jest w 100% to samo co stare lista[lista.Count - 1].
- * lista[^2] – oznacza "drugi od końca" (przedostatni).
+Zamiast pisać długie matematyczne obliczenia, żeby dostać się do ostatnich elementów na liście, używasz daszka. Zastępuje on klasyczne `lista.Count - x`.
+ * `lista[^1]` – oznacza "pierwszy element od końca" (czyli dosłownie ostatni). To jest w 100% to samo co stare `lista[lista.Count - 1]`.
+ * `lista[^2]` – oznacza "drugi od końca" (przedostatni).
 Ważna pułapka: Daszek nie działa jak zwykłe indeksy liczone od zera. lista[^0] wywali błąd programu! Dlaczego? Bo ^0 oznacza dosłownie "długość całej tablicy", a element o takim indeksie fizycznie nie istnieje (spadłabyś z krawędzi tablicy). Liczenie od końca zawsze zaczynamy od ^1.
 Dwie kropki (..) – Wycinki (Ranges)
 Służą do wycinania "plastra" z większej listy lub tablicy. Zapisujesz to jako [poczatek .. koniec].
 Złota zasada: Element początkowy jest brany do wycinka, ale element końcowy już NIE (jest to tzw. granica wykluczająca).
- * lista[1..4] – wyciąga elementy z szufladek nr 1, 2 i 3. Zatrzymuje się przed 4.
- * lista[2..] – jeśli nie podasz prawej strony, komputer weźmie wszystko od indeksu nr 2 aż do samego końca.
- * lista[..3] – jeśli nie podasz lewej strony, komputer zacznie od samego początku i weźmie elementy 0, 1 i 2.
- * lista[^3..^1] – możesz to łączyć z daszkami! Weźmie "trzeci od końca" i "drugi od końca" (zatrzyma się przed "pierwszym od końca").
-Jak to się ma do [.., { Value: < 0 }] z poprzedniego zadania?
-W tamtym zadaniu użyliśmy dwóch kropek we wzorcach list wewnątrz instrukcji switch. Tam kropki pełnią funkcję "worka na resztę".
+ * `lista[1..4]` – wyciąga elementy z szufladek nr 1, 2 i 3. Zatrzymuje się przed 4.
+ * `lista[2..]` – jeśli nie podasz prawej strony, komputer weźmie wszystko od indeksu nr 2 aż do samego końca.
+ * `lista[..3]` – jeśli nie podasz lewej strony, komputer zacznie od samego początku i weźmie elementy 0, 1 i 2.
+ * `lista[^3..^1]` – możesz to łączyć z daszkami! Weźmie "trzeci od końca" i "drugi od końca" (zatrzyma się przed "pierwszym od końca").
+
+**Jak to się ma do `[.., { Value: < 0 }]` z poprzedniego zadania?**   
+W tamtym zadaniu użyliśmy dwóch kropek we wzorcach list wewnątrz instrukcji `switch`. Tam kropki pełnią funkcję "worka na resztę".
 Kiedy program widzi filtr napisany jako [.., { Value: < 0 }], kropki na początku oznaczają: "Zignoruj dowolną liczbę elementów na starcie (może być ich 0, a może być 1000), po prostu przewiń to do przodu i skup się tylko na ostatnim elemencie w nawiasach".
 
 # Dictionary
 
-Słownik (Dictionary<TKey, TValue>) to odpowiednik biurowej szafki na dokumenty. Każda szufladka w tej szafce musi mieć przyklejoną absolutnie unikalną naklejkę (Klucz / Key), pod którą kryje się konkretna zawartość (Wartość / Value).
-Najważniejsze właściwości (Stan słownika)
- * .Count – Zwraca liczbę zajętych szufladek w szafce.
- * .Keys – Oddaje worek, w którym są wyłącznie same naklejki ze wszystkich szufladek (np. lista wszystkich nazw czujników).
- * .Values – Oddaje worek z samą zawartością, całkowicie ignorując naklejki (np. same liczby odczytów).
-Dodawanie i modyfikacja
- * slownik.Add(klucz, wartosc) – Wstawia nową szufladkę z naklejką i zawartością. Uwaga: Jeśli spróbujesz dodać naklejkę, która już fizycznie wisi na innej szufladce, program natychmiast wywali krytyczny błąd ( wyjątek ArgumentException).
- * slownik[klucz] = wartosc – Metoda inteligentna i najczęściej używana (indexer). Działa podwójnie: jeśli naklejki nie ma w szafce, to ją bezpiecznie zakłada. Jeśli naklejka już jest, to po prostu otwiera tę szufladkę i bezlitośnie nadpisuje (podmienia) jej starą zawartość na nową.
- * .TryAdd(klucz, wartosc) – Metoda ostrożna. Próbuje wstawić nową szufladkę. Jeśli naklejki nie było, wstawia ją i zwraca true. Jeśli naklejka już była, nic nie robi (nie psuje starych danych) i po prostu cicho zwraca false.
-Wyciąganie danych
- * slownik[klucz] – Podajesz nazwę naklejki w nawiasach kwadratowych i dostajesz zawartość szufladki. Uwaga: Jeśli takiej naklejki nie ma w szafce, program wywali błąd (KeyNotFoundException).
- * .TryGetValue(klucz, out wartosc) – Metoda ratunkowa. Komputer mówi: "Sprawdzę, czy jest taka naklejka. Jeśli tak, to włożę wynik do Twojej zmiennej i zwrócę true. Jeśli nie, to zwrócę false i dam Ci spokój, bez wywalania programu".
-   (Przykład: if (slownik.TryGetValue("Balkon", out double wynik)) { ... })
-Wyszukiwanie i sprawdzanie
- * .ContainsKey(klucz) – Najważniejsza metoda przy słownikach. Odpowiada true / false na pytanie: "Czy mamy już taką naklejkę?". Słowniki są specjalnie zoptymalizowane tak, żeby ta metoda działała dosłownie w ułamek milisekundy, nawet jeśli szufladek jest milion (tzw. tablica z haszowaniem).
- * .ContainsValue(wartosc) – Szuka po zawartości (np. "Czy w jakiejkolwiek szufladce leży liczba 100?"). To działa wolno, bo komputer musi otworzyć każdą szufladkę po kolei i zajrzeć do środka.
-Usuwanie elementów
- * .Remove(klucz) – Szuka szufladki po naklejce i wyrywa ją całą z szafki. Zwraca true (udało się wyrzucić) lub false (w ogóle nie było takiej naklejki, więc nic nie wyrzucono).
- * .Clear() – Wywala całą zawartość wszystkich szufladek naraz. Szafka zostaje pusta (.Count spada do 0).
-Przeglądanie (Pętle)
- * foreach (var kvp in slownik) – Klasyczne wyciąganie po jednej szufladce naraz. Zmienna kvp (czyli Key-Value Pair) to ta wyciągnięta szufladka. Rozpakowujesz ją używając:
-   * kvp.Key (czytasz naklejkę)
-   * kvp.Value (czytasz zawartość)
+Słownik (`Dictionary<TKey, TValue>`) to odpowiednik biurowej szafki na dokumenty. Każda szufladka w tej szafce musi mieć przyklejoną absolutnie unikalną naklejkę (Klucz / Key), pod którą kryje się konkretna zawartość (Wartość / Value).
 
-Kiedy robisz foreach (var kvp in slownik), napotykasz dwie blokady:
- * Zmienna kvp jest tylko do odczytu: Nie możesz napisać kvp.Value = 10;. Dlaczego? Bo kvp to tylko kartka, na której komputer przepisał Ci to, co widział w szafce. Zmiana liczby na tej kartce nie zmieniłaby magicznie zawartości prawdziwej szuflady.
- * Zakaz przebudowy mebla: Jeśli w trakcie trwania pętli foreach spróbujesz dołożyć do szafki nową szufladkę (Add) albo jakąś wyrwać (Remove), C# natychmiast wywali krytyczny błąd (InvalidOperationException: Collection was modified). Zasada brzmi: Nie możesz przebudowywać szafki, podczas gdy pętla jest w trakcie jej inwentaryzacji.
-Oto jak się to rozwiązuje w praktyce w zależności od tego, co dokładnie chcesz zrobić:
-Sposób 1: Kiedy chcesz tylko podmienić wartość w ISTNIEJĄCEJ szufladce
+**Najważniejsze właściwości (Stan słownika)**
+ * `.Count` – Zwraca liczbę zajętych szufladek w szafce.
+ * `.Keys` – Oddaje worek, w którym są wyłącznie same naklejki ze wszystkich szufladek (np. lista wszystkich nazw czujników).
+ * `.Values` – Oddaje worek z samą zawartością, całkowicie ignorując naklejki (np. same liczby odczytów).
+**Dodawanie i modyfikacja**
+ * `slownik.Add(klucz, wartosc)` – Wstawia nową szufladkę z naklejką i zawartością. Uwaga: Jeśli spróbujesz dodać naklejkę, która już fizycznie wisi na innej szufladce, program natychmiast wywali krytyczny błąd ( wyjątek ArgumentException).
+ * `slownik[klucz] = wartosc` – Metoda inteligentna i najczęściej używana (indexer). Działa podwójnie: jeśli naklejki nie ma w szafce, to ją bezpiecznie zakłada. Jeśli naklejka już jest, to po prostu otwiera tę szufladkę i bezlitośnie nadpisuje (podmienia) jej starą zawartość na nową.
+ * `.TryAdd(klucz, wartosc)` – Metoda ostrożna. Próbuje wstawić nową szufladkę. Jeśli naklejki nie było, wstawia ją i zwraca true. Jeśli naklejka już była, nic nie robi (nie psuje starych danych) i po prostu cicho zwraca false.
+Wyciąganie danych
+ * `slownik[klucz]` – Podajesz nazwę naklejki w nawiasach kwadratowych i dostajesz zawartość szufladki. Uwaga: Jeśli takiej naklejki nie ma w szafce, program wywali błąd (KeyNotFoundException).
+ * `.TryGetValue(klucz, out wartosc)` – Metoda ratunkowa. Komputer mówi: "Sprawdzę, czy jest taka naklejka. Jeśli tak, to włożę wynik do Twojej zmiennej i zwrócę true. Jeśli nie, to zwrócę false i dam Ci spokój, bez wywalania programu". Przykład: `if (slownik.TryGetValue("Balkon", out double wynik)) { ... }`.
+Wyszukiwanie i sprawdzanie
+ * `.ContainsKey(klucz)` – Najważniejsza metoda przy słownikach. Odpowiada true / false na pytanie: "Czy mamy już taką naklejkę?". Słowniki są specjalnie zoptymalizowane tak, żeby ta metoda działała dosłownie w ułamek milisekundy, nawet jeśli szufladek jest milion (tzw. tablica z haszowaniem).
+ * `.ContainsValue(wartosc)` – Szuka po zawartości (np. "Czy w jakiejkolwiek szufladce leży liczba 100?"). To działa wolno, bo komputer musi otworzyć każdą szufladkę po kolei i zajrzeć do środka.
+**Usuwanie elementów**
+ * `.Remove(klucz)` – Szuka szufladki po naklejce i wyrywa ją całą z szafki. Zwraca true (udało się wyrzucić) lub false (w ogóle nie było takiej naklejki, więc nic nie wyrzucono).
+ * `.Clear()` – Wywala całą zawartość wszystkich szufladek naraz. Szafka zostaje pusta (.Count spada do 0).
+**Przeglądanie (Pętle)**
+ * `foreach (var kvp in slownik)` – Klasyczne wyciąganie po jednej szufladce naraz. Zmienna kvp (czyli Key-Value Pair) to ta wyciągnięta szufladka. Rozpakowujesz ją używając:
+   * `kvp.Key` (czytasz naklejkę)
+   * `kvp.Value` (czytasz zawartość)
+
+**Kiedy robisz foreach (var kvp in slownik), napotykasz dwie blokady:**
+
+* Zmienna **kvp jest tylko do odczytu:** Nie możesz napisać `kvp.Value = 10;`. Dlaczego? Bo kvp to tylko kartka, na której komputer przepisał Ci to, co widział w szafce. Zmiana liczby na tej kartce nie zmieniłaby magicznie zawartości prawdziwej szuflady.
+* Zakaz przebudowy mebla: Jeśli **w trakcie trwania pętli foreach spróbujesz dołożyć do szafki nową szufladkę (Add) albo jakąś wyrwać (Remove), C# natychmiast wywali krytyczny błąd** (`InvalidOperationException: Collection was modified`). Zasada brzmi: Nie możesz przebudowywać szafki, podczas gdy pętla jest w trakcie jej inwentaryzacji.
+
+**Oto jak się to rozwiązuje w praktyce w zależności od tego, co dokładnie chcesz zrobić:**
+
+**Sposób 1:** Kiedy chcesz tylko podmienić wartość w ISTNIEJĄCEJ szufladce   
 Mimo że pętla trwa, C# pozwala Ci włożyć rękę do szafki i podmienić zawartość, o ile nie zmieniasz liczby szufladek. Robisz to po prostu odwołując się do słownika przez klucz:
+
+```csharp
 foreach (var kvp in slownik) {
     // kvp.Value = 100; --> BŁĄD, bo to tylko odczyt z kartki
     
     // Ale to zadziała idealnie:
     slownik[kvp.Key] = 100; // Mówisz: "Szafko, do tej konkretnej szuflady włóż 100"
 }
+```
 
-Sposób 2: Pancerna metoda na wszystko (Usuwanie, Dodawanie, Zmienianie)
-Jeśli chcesz w trakcie pętli swobodnie usuwać stare czujniki, dodawać nowe albo robić totalną demolkę w słowniku, musisz użyć triku z klonowaniem listy naklejek. Służy do tego dopisek .ToList().
+**Sposób 2:** Pancerna metoda na wszystko (Usuwanie, Dodawanie, Zmienianie)   
+Jeśli chcesz w trakcie pętli swobodnie usuwać stare czujniki, dodawać nowe albo robić totalną demolkę w słowniku, musisz użyć triku z klonowaniem listy naklejek. Służy do tego dopisek `.ToList()`.
 
 ```csharp
 // Pobieramy same naklejki i robimy ich ksero do osobnej listy (.ToList)
@@ -428,4 +436,4 @@ foreach (var klucz in slownik.Keys.ToList()) {
 }
 ```
 
-Dzięki .ToList() robisz sobie "zdjęcie" wszystkich naklejek przed rozpoczęciem pracy. Pętla czyta z tego ksera, więc główna szafka jest całkowicie odblokowana i możesz na niej wykonywać dowolne operacje.
+Dzięki `.ToList()` robisz sobie "zdjęcie" wszystkich naklejek przed rozpoczęciem pracy. Pętla czyta z tego ksera, więc główna szafka jest całkowicie odblokowana i możesz na niej wykonywać dowolne operacje.
