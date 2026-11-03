@@ -69,22 +69,49 @@ Delegat to "pojemnik" na funkcję. Pozwala przekazać ZACHOWANIE (kod), a nie ty
 
 ### Wbudowane typy delegatów (Pudełka)
 
-Zamiast pisać własne delegaty, używasz gotowców:
+W C# delegat to nic innego jak "pudełko" (albo wskaźnik), do którego możesz włożyć jakąś metodę i przekazać ją dalej. Kiedyś, żeby użyć delegata, trzeba było go najpierw ręcznie zdefiniować (np. `delegate int MojaFunkcja(int a, int b);`). Twórcy C# zauważyli, że to żmudne, więc stworzyli **`Func`** i **`Action`** – uniwersalne, gotowe szablony delegatów, które pokrywają 99% przypadków.
 
-* **`Action<T>`** – przyjmuje parametry, ale **nic nie zwraca (`void`)**.
-* `Action` – brak parametrów `() => ...`
-* `Action<string, int>` – przyjmuje string i int.
+### 1. Czym jest `Action`?
 
-* **`Func<T..., TResult>`** – **ZAWSZE coś zwraca**. Ostatni typ w nawiasach to typ wyniku.
-* `Func<double>` – nic nie przyjmuje, zwraca `double`.
-* `Func<string, int>` – przyjmuje `string`, zwraca `int`.
+**`Action` to delegat, który nic nie zwraca (jego typ zwracany to `void`).**
+Po prostu "wykonuje akcję". W nawiasach ostrych `< >` podajesz tylko typy argumentów, które ta funkcja ma przyjąć (od 0 do 16 argumentów).
 
-* **`Predicate<T>`** – to po prostu `Func<T, bool>`. Zwraca zawsze TAK/NIE (np. szukanie nieparzystych).
-* **`Comparison<T>`** – to po prostu `Func<T, T, int>`. Zwraca wynik porównania (-1, 0, 1) do sortowania.
+* `Action` – funkcja bez argumentów. (np. `void ZrobCos()`)
+* `Action<int>` – funkcja przyjmująca jednego inta. (np. `void WypiszLiczbe(int x)`)
+* `Action<string, bool>` – funkcja przyjmująca stringa i boola.
 
-> **Słówka `in` i `out` w delegatach:**
-> * `out` (Kowariancja / Wyjście): Możesz zwrócić typ *bardziej szczegółowy* (np. zamiast Zwierzęcia zwrócić Psa).
-> * `in` (Kontrawariancja / Wejście): Możesz podpiąć metodę wymagającą typu *bardziej ogólnego* (np. zamiast metody jedzącej tylko wołowinę, podpiąć jedzącą wszystko).
+### 2. Czym jest `Func`?
+
+**`Func` to delegat, który ZAWSZE coś zwraca (ma konkretny typ wyniku).**
+W nawiasach ostrych `< >` podajesz argumenty wejściowe, ale **ostatni typ na liście to ZAWSZE typ zwracany**.
+
+* `Func<int>` – funkcja bez argumentów, zwracająca inta. (np. `int DajLiczbe()`)
+* `Func<string, int>` – funkcja przyjmująca `string` wejściowy i zwracająca wynik `int` (np. funkcja licząca długość tekstu `int PoliczZnaki(string s)`).
+* `Func<int, int, bool>` – przyjmuje dwa inty, zwraca bool (np. `bool CzyWieksza(int a, int b)`).
+
+### O co chodzi z `in` i `out`? (Kowariancja i Kontrawariancja)
+
+To zaawansowany, ale bardzo logiczny mechanizm. Słówka `in` i `out` przy typach generycznych określają, jak elastyczny jest C#, gdy używasz dziedziczenia klas (np. masz klasę bazową `Zwierze` i dziedziczącą po niej klasę `Pies`).
+
+**Słówko `out` (Wychodzi z funkcji = Kowariancja)**
+Zauważ, że w definicji `Func` typ zwracany ma zawsze słówko `out` (`out TResult`). Oznacza to, że z tego delegata "wyjdzie" jakiś wynik.
+
+Zasada: **Możesz zwrócić typ bardziej szczegółowy (pochodny), niż oczekiwano.**
+
+* Masz w kodzie zmienną delegata: `Func<Zwierze> mojDelegat;` (oczekujesz funkcji, która da Ci *jakieś* zwierzę).
+* Możesz do niej przypisać metodę, która zwraca konkretnie Psa: `Pies DajPsa() { ... }`.
+* Dlaczego C# na to pozwala? Skoro funkcja zwraca Psa, a program spodziewa się Zwierzęcia, to wszystko jest bezpieczne – każdy Pies to Zwierze. Rzutujesz typ zwracany "w górę" w hierarchii dziedziczenia.
+
+**Słówko `in` (Wchodzi do funkcji = Kontrawariancja)**
+Zauważ, że parametry wejściowe mają zawsze słówko `in` (np. `in T arg`). Oznacza to, że te dane "wchodzą" do środka funkcji.
+
+Zasada: **Możesz użyć funkcji, która przyjmuje typ bardziej ogólny (bazowy), niż oczekiwano.**
+
+* Masz w kodzie delegata: `Action<Pies> mojDelegat;` (potrzebujesz funkcji, która potrafi obsłużyć Psa).
+* Możesz do niego przypisać metodę, która potrafi zająć się każdym zwierzęciem: `void Nakarm(Zwierze z) { ... }`.
+* Dlaczego C# na to pozwala? Skoro przypisana metoda potrafi nakarmić *dowolne* zwierzę, to na 100% poradzi sobie z nakarmieniem Psa. Mimo że delegat jest "wąski" (tylko na Psy), podpinasz pod niego metodę "szeroką" (na wszystkie Zwierzęta). Rzutujesz parametr "w dół".
+
+Podsumowując: `in` pozwala podpiąć metodę przyjmującą bardziej **ogólne** argumenty, a `out` pozwala podpiąć metodę zwracającą bardziej **szczegółowy** wynik.
 
 ### Multicast Delegates (Operator `+=` i `-=`)
 
