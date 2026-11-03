@@ -58,49 +58,118 @@ WypucujMojeJablko(uniwersalnaMyjnia);
 
 # Delegaty
 
-W C# delegat to nic innego jak "pudełko" (albo wskaźnik), do którego możesz włożyć jakąś metodę i przekazać ją dalej. Kiedyś, żeby użyć delegata, trzeba było go najpierw ręcznie zdefiniować (np. `delegate int MojaFunkcja(int a, int b);`). Twórcy C# zauważyli, że to żmudne, więc stworzyli **`Func`** i **`Action`** – uniwersalne, gotowe szablony delegatów, które pokrywają 99% przypadków.
+### Podstawy i wywoływanie (`Invoke`)
 
-### 1. Czym jest `Action`?
+Delegat to "pojemnik" na funkcję. Pozwala przekazać ZACHOWANIE (kod), a nie tylko suche dane.
 
-**`Action` to delegat, który nic nie zwraca (jego typ zwracany to `void`).**
-Po prostu "wykonuje akcję". W nawiasach ostrych `< >` podajesz tylko typy argumentów, które ta funkcja ma przyjąć (od 0 do 16 argumentów).
+* **Wbudowana metoda `.Invoke()**` – fizycznie uruchamia funkcję zapisaną w delegacie.
+* `mojDelegat(5)` to ukryty skrót od `mojDelegat.Invoke(5)`.
+* **Złota zasada bezpieczeństwa:** Używaj znaku zapytania `?.`, żeby program nie wybuchł, gdy delegat jest pusty:
+`mojDelegat?.Invoke(5);` *(Jeśli null -> zignoruj i idź dalej).*
 
-* `Action` – funkcja bez argumentów. (np. `void ZrobCos()`)
-* `Action<int>` – funkcja przyjmująca jednego inta. (np. `void WypiszLiczbe(int x)`)
-* `Action<string, bool>` – funkcja przyjmująca stringa i boola.
+### Wbudowane typy delegatów (Pudełka)
 
-### 2. Czym jest `Func`?
+Zamiast pisać własne delegaty, używasz gotowców:
 
-**`Func` to delegat, który ZAWSZE coś zwraca (ma konkretny typ wyniku).**
-W nawiasach ostrych `< >` podajesz argumenty wejściowe, ale **ostatni typ na liście to ZAWSZE typ zwracany**.
+* **`Action<T>`** – przyjmuje parametry, ale **nic nie zwraca (`void`)**.
+* `Action` – brak parametrów `() => ...`
+* `Action<string, int>` – przyjmuje string i int.
 
-* `Func<int>` – funkcja bez argumentów, zwracająca inta. (np. `int DajLiczbe()`)
-* `Func<string, int>` – funkcja przyjmująca `string` wejściowy i zwracająca wynik `int` (np. funkcja licząca długość tekstu `int PoliczZnaki(string s)`).
-* `Func<int, int, bool>` – przyjmuje dwa inty, zwraca bool (np. `bool CzyWieksza(int a, int b)`).
+* **`Func<T..., TResult>`** – **ZAWSZE coś zwraca**. Ostatni typ w nawiasach to typ wyniku.
+* `Func<double>` – nic nie przyjmuje, zwraca `double`.
+* `Func<string, int>` – przyjmuje `string`, zwraca `int`.
 
-### O co chodzi z `in` i `out`? (Kowariancja i Kontrawariancja)
+* **`Predicate<T>`** – to po prostu `Func<T, bool>`. Zwraca zawsze TAK/NIE (np. szukanie nieparzystych).
+* **`Comparison<T>`** – to po prostu `Func<T, T, int>`. Zwraca wynik porównania (-1, 0, 1) do sortowania.
 
-To zaawansowany, ale bardzo logiczny mechanizm. Słówka `in` i `out` przy typach generycznych określają, jak elastyczny jest C#, gdy używasz dziedziczenia klas (np. masz klasę bazową `Zwierze` i dziedziczącą po niej klasę `Pies`).
+> **Słówka `in` i `out` w delegatach:**
+> * `out` (Kowariancja / Wyjście): Możesz zwrócić typ *bardziej szczegółowy* (np. zamiast Zwierzęcia zwrócić Psa).
+> * `in` (Kontrawariancja / Wejście): Możesz podpiąć metodę wymagającą typu *bardziej ogólnego* (np. zamiast metody jedzącej tylko wołowinę, podpiąć jedzącą wszystko).
 
-**Słówko `out` (Wychodzi z funkcji = Kowariancja)**
-Zauważ, że w definicji `Func` typ zwracany ma zawsze słówko `out` (`out TResult`). Oznacza to, że z tego delegata "wyjdzie" jakiś wynik.
+### Multicast Delegates (Operator `+=` i `-=`)
 
-Zasada: **Możesz zwrócić typ bardziej szczegółowy (pochodny), niż oczekiwano.**
+Jeden delegat może trzymać listę wielu metod i odpalać je jedna po drugiej.
 
-* Masz w kodzie zmienną delegata: `Func<Zwierze> mojDelegat;` (oczekujesz funkcji, która da Ci *jakieś* zwierzę).
-* Możesz do niej przypisać metodę, która zwraca konkretnie Psa: `Pies DajPsa() { ... }`.
-* Dlaczego C# na to pozwala? Skoro funkcja zwraca Psa, a program spodziewa się Zwierzęcia, to wszystko jest bezpieczne – każdy Pies to Zwierze. Rzutujesz typ zwracany "w górę" w hierarchii dziedziczenia.
+* `writeLog += ZapiszDoPliku;` (dodaje do listy).
+* **Nulle są bezpieczne:** Zrobienie `+=` lub `-=` na delegacie, który jest `null`, nie powoduje błędu (C# sam to obsługuje).
+* **UWAGA na zwracanie wartości (np. w Func):** Jeśli podepniesz kilka funkcji pod delegata, który coś zwraca, dostaniesz **tylko wynik ostatniej funkcji**. Poprzednie idą do kosza. Dlatego `+=` używa się głównie z `Action`.
 
-**Słówko `in` (Wchodzi do funkcji = Kontrawariancja)**
-Zauważ, że parametry wejściowe mają zawsze słówko `in` (np. `in T arg`). Oznacza to, że te dane "wchodzą" do środka funkcji.
+### Wyrażenia Lambda (Wtyczki do gniazdka `=>`)
 
-Zasada: **Możesz użyć funkcji, która przyjmuje typ bardziej ogólny (bazowy), niż oczekiwano.**
+Skrócony zapis funkcji (tzw. metoda anonimowa).
 
-* Masz w kodzie delegata: `Action<Pies> mojDelegat;` (potrzebujesz funkcji, która potrafi obsłużyć Psa).
-* Możesz do niego przypisać metodę, która potrafi zająć się każdym zwierzęciem: `void Nakarm(Zwierze z) { ... }`.
-* Dlaczego C# na to pozwala? Skoro przypisana metoda potrafi nakarmić *dowolne* zwierzę, to na 100% poradzi sobie z nakarmieniem Psa. Mimo że delegat jest "wąski" (tylko na Psy), podpinasz pod niego metodę "szeroką" (na wszystkie Zwierzęta). Rzutujesz parametr "w dół".
+* **Brak argumentów:** `() => Console.WriteLine("X");`
+* **1 argument (można pominąć nawiasy):** `x => x * x;`
+* **2+ argumentów (nawiasy obowiązkowe):** `(a, b) => a + b;`
+* **Brak klamerek:** Oznacza jedno działanie i automatyczny `return`.
+* **Klamerki `{ }`:** Wymagają jawnego `return`, jeśli funkcja coś zwraca, a dla `Action` można podać w nich ciąg instrukcji.
 
-Podsumowując: `in` pozwala podpiąć metodę przyjmującą bardziej **ogólne** argumenty, a `out` pozwala podpiąć metodę zwracającą bardziej **szczegółowy** wynik.
+```csharp
+x => { if(x > 0) return true; return false; }
+```
+
+**Różne style zapisu z typami:**
+
+1. Kompilator domyśla się z lewej strony:   
+`Func<double, double> square = x => x * x;`   
+2. Z użyciem słówka `var` (wymaga precyzji po prawej, jawny typ zwracany + typy argumentów):   
+`var square = double (double x) => x * x;`   
+`var echo = void (string s) => Console.Write(s);`   
+3. Z domyślnym parametrem (od C# 12):   
+`var write = (string str = "hello") => Console.Write(str);`   
+
+### Jak "pod maską" działa wstrzykiwanie logiki (np. `FindAll`)
+
+Wbudowane funkcje (jak `FindAll(Predicate)` czy algorytm Newtona) mają napisane całe pętle i mechanizmy. My wstrzykujemy tylko sam "warunek".
+
+```csharp
+// Podajemy tylko "wtyczkę" (lambdę). Pętla robi się sama.
+List<int> nieparzyste = liczby.FindAll(x => x % 2 != 0);
+```
+
+### Złota Pułapka: Przechwytywanie Zmiennych (Closures)
+
+Kiedy lambda korzysta ze zmiennej, która leży "poza nią", zakłada na nią "podsłuch" na żywo. Kompilator kradnie tę zmienną ze stosu i robi dla niej klasę ("plecak") **na stercie**.
+
+**Pułapka w pętli `for`:**
+
+```csharp
+for (int i = 0; i < 3; i++) actions[i] = () => Console.Write(i);
+// Wywołanie wypisze: 3 3 3
+// Powód: Jest tylko JEDNA zmienna 'i' (jeden plecak). Pętla bije do 3, lambdy widzą wynik końcowy.
+// FIX: Wewnątrz pętli dopisz: int kopia = i;
+```
+
+**Brak pułapki w pętli `foreach` (od C# 5.0):**
+
+```csharp
+foreach (var i in new[] { 1, 2, 3 }) actions.Add(() => Console.Write(i));
+// Wywołanie wypisze: 1 2 3
+// Powód: W foreach w każdym kroku pętli kompilator tworzy całkowicie NOWĄ zmienną (nowy plecak).
+```
+
+### Odcięcie podsłuchu: słówko `static` (Optymalizacja)
+
+Jeśli dodasz `static` przed lambdą, **zabronisz jej korzystać ze zmiennych z zewnątrz**.
+
+```csharp
+int zewnetrzna = 5;
+Func<int, int> zla = static x => x + zewnetrzna; // BŁĄD KOMPILACJI!
+```
+
+* **Po co to robimy?** Mikrooptymalizacja (np. Raytracer). Kompilator nie musi tworzyć obiektów-"plecaków" na stercie, więc odciążamy Garbage Collectora i RAM.
+* **Gdzie działa najlepiej:** W metodach na listach, gdzie argument jest oficjalnym parametrem, a nie z zewnątrz: `liczby.ForEach(static x => Console.WriteLine(x));`
+
+### Stare Metody Anonimowe (`delegate`) - Ostatni powód ich użycia
+
+Dzisiaj nikt nie pisze: `delegate (double x) { return x * x; }`, bo lambdy `x => x * x` są krótsze.   
+Mają jednak jedną supermoc — **Pusty Delegat (Wydmuszka)**.
+
+```csharp
+Action<string> log = delegate {};
+```
+
+Dzięki przypisaniu `delegate {}`, nasz delegat **nigdy nie jest nullem**. Przyjmie każdy wymagany argument i nie zrobi z nim nic. Pozwala to wywoływać go bezpośrednio: `log("test");` bez ryzyka `NullReferenceException` i bez używania `?.Invoke()`.
 
 # Rekordy
 
