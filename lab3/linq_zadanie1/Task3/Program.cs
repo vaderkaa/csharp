@@ -69,7 +69,7 @@ public class Program {
                         join zamowienie in database.Orders on klient.CustomerId equals zamowienie.CustomerId into zamowieniaKlienta
                         where zamowieniaKlienta.Any()
                         let pierwszaData = zamowieniaKlienta.Min(z => z.Date)
-                        orderby pierwszaData ascending
+                        orderby pierwszaData // ascending
                         select new
                         {
                             Imie = klient.FirstName,
@@ -126,9 +126,20 @@ public class Program {
         // ZAPYTANIE 1: Obliczamy czystą sumę wydatków dla każdego klienta (bez zniżek)
         // Złączamy produkty z zamówieniami i od razu grupujemy po CustomerId
         var wydatkiBezZnizki = from op in database.OrderProducts
+                               // Zaczynamy od produktow, wiec nie bedzie klientow, ktorzy nic nie zamowili
                                join p in database.Products on op.ProductId equals p.ProductId
                                join o in database.Orders on op.OrderId equals o.OrderId
                                group op.Quantity * p.Price by o.CustomerId into g
+                               /* 
+                               MECHANIZM: group [CO] by [KLUCZ] into [g]
+                               W LINQ grupowanie nie spłaszcza tabeli jak w SQL, tylko tworzy KOLEKCJĘ KOLEKCJI (tzw. "pudełka z etykietą").
+
+                               - 'g' to pojedyncze pudełko (dziedziczy po IEnumerable, to po prostu mniejsza lista).
+                               - 'g.Key' to etykieta tego pudełka (wartość, po której grupowaliśmy, np. CustomerId).
+
+                               W klauzuli SELECT operujemy osobno na każdym pudełku 'g':
+                               Wywołanie g.Sum() zsumuje elementy TYLKO z tego jednego, konkretnego pudełka.
+                               */
                                select new
                                {
                                    CustomerId = g.Key,
@@ -142,12 +153,12 @@ public class Program {
                        // żeby nie odrzucić klientów, którzy nigdy nic nie kupili.
                        join wydatek in wydatkiBezZnizki on klient.CustomerId equals wydatek.CustomerId into powiazaneWydatki
                        // .Sum() na pustej liście zwróci bezpieczne 0.0
-                       let sumaWydatkow = powiazaneWydatki.Sum(w => w.Kwota)
+                       let sumaWydatkow = powiazaneWydatki.Sum(w => w.Kwota) // Zeby otrzymac 0 przy klientach bez zamowien
 
                        // 2. Podpinamy tabelę zniżek
                        join karta in database.LoyaltyCards on klient.CustomerId equals karta.CustomerId into powiazaneKarty
                        // Jeśli klient nie ma karty, lista jest pusta, a .Sum() zwróci 0.0
-                       let znizka = powiazaneKarty.Sum(k => k.Discount)
+                       let znizka = powiazaneKarty.Sum(k => k.Discount) // Zeby otrzymac 0 przy klientach bez karty
 
                        // 3. Aplikujemy zniżkę do sumy
                        let kwotaKoncowa = sumaWydatkow * (1.0 - znizka)
