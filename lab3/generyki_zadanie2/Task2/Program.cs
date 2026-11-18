@@ -8,7 +8,7 @@ public class Program {
     public static void Main() {
         var t0 = new DateTime(2026, 10, 10, 10, 0, 0);
         var log = new SensorLog();
-        log.LoadFromCsv("..\\..\\..\\readings.csv");
+        log.LoadFromCsv("readings.csv");
 
         // =============================================================
 
