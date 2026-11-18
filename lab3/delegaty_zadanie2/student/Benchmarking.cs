@@ -33,11 +33,31 @@ public static class Benchmarking
         string _ = string.Join(string.Empty, Enumerable.Repeat('a', Size));
     }
 
-    // TODO: CreateBenchmark
+    public static Action CreateBenchmark(Action action, string name, int times = 1000)
+    // times - opcjonalny parametr
+    {
+        Action tool = () =>
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            for (int i = 0; i < times; i++)
+                action();
+            stopwatch.Stop();
+
+            double averageTime = stopwatch.Elapsed.TotalMilliseconds / times;
+            Console.WriteLine($"Function {name}: {averageTime} ms on average");
+        };
+        return tool;
+    }
 
     public static IEnumerable<Action> CreateBenchmarks()
     {
-        // TODO: CreateBenchmarks
-        return ImmutableList.Create(StringAdd, StringBuilder, StringJoin);
+        return new Action[]
+        {
+            CreateBenchmark(StringAdd, "StringAdd"),
+            CreateBenchmark(StringBuilder, "StringBuilder"),
+            CreateBenchmark(StringJoin, "StringJoin")
+        };
+        //return ImmutableList.Create(StringAdd, StringBuilder, StringJoin);
     }
 }

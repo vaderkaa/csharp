@@ -1,8 +1,8 @@
-﻿// #define BINARY_TREE
-// #define DICTIONARY_EXTENSIONS
-// #define ENUMERABLE_EXTENSIONS
-// #define BENCHMARKING
-// #define NUMERICS
+﻿#define BINARY_TREE
+#define DICTIONARY_EXTENSIONS
+#define ENUMERABLE_EXTENSIONS
+#define BENCHMARKING
+#define NUMERICS
 
 using System.Diagnostics;
 using System.Globalization;

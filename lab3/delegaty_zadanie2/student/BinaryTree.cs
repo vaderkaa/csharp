@@ -28,11 +28,31 @@ public class BinaryTree<T> where T : notnull
         Root = root;
     }
 
-    // TODO: BreadthFirstSearch
+    public void BreadthFirstSearch(Action<Node> onVisit)
+    {
+        Queue<Node> queue = new Queue<Node>();
+        if (Root is not null) // Root jest nullowalny i moze byc null
+            queue.Enqueue(Root);
+        while(queue.Count > 0)
+        {
+            Node N = queue.Dequeue();
+            onVisit?.Invoke(N); // na wypadek czy delegat nie jest nullem
+            if (N.Left is not null)
+                queue.Enqueue(N.Left);
+            if (N.Right is not null)
+                queue.Enqueue(N.Right);
+        }
+    }
 
     public int ValueCount(T value)
     {
-        // TODO: ValueCount
-        return default;
+        int count = 0;
+        BreadthFirstSearch(node =>
+        {
+            if (Comparer<T>.Default.Compare(node.Value, value) == 0)
+                count++;
+        });
+        return count;
+        // return default;
     }
 }
