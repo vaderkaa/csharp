@@ -10,13 +10,16 @@ public class Program {
         Console.WriteLine("Provided:");
 
         var zadanie1 = from klient in database.Customers
-                        join karta in database.LoyaltyCards
-                        on klient.CustomerId equals karta.CustomerId into powiazane_karty
-                        where powiazane_karty.Count() == 0
-                        orderby klient.LastName, klient.FirstName
-                        select new { Nazwisko = klient.LastName, Imie = klient.FirstName };
+                       join karta in database.LoyaltyCards on klient.CustomerId equals karta.CustomerId into powiazaneKarty
+                       where !powiazaneKarty.Any() // nie ma zadnej karty w kolekcji powiazaneKarty
+                       orderby klient.LastName, klient.FirstName
+                       select new
+                       {
+                           Nazwisko = klient.LastName,
+                           Imie = klient.FirstName
+                       };
 
-        foreach(var item in zadanie1)
+        foreach (var item in zadanie1)
         {
             Console.WriteLine($"{item.Nazwisko} {item.Imie}");
         }
@@ -27,7 +30,8 @@ public class Program {
         Console.WriteLine("Bąk Marek");
         Console.WriteLine("Wiśniewski Artur");
 
-        // 2. Based on the PESEL number, select people who are more than 29 years old, by birth year. Display these people from oldest to youngest.
+        // 2. Based on the PESEL number, select people who are more than 29 years old, by birth year.
+        // Display these people from oldest to youngest.
         // Requirement: do not count the same person multiple times (you may use the let clause)
         // Hint: A PESEL number from 2000 onwards differs in that 20 is added to the month value
         Console.WriteLine();
@@ -38,18 +42,17 @@ public class Program {
                        let rok = int.Parse(klient.PESEL.Substring(0, 2))
                        let miesiac = int.Parse(klient.PESEL.Substring(2, 2))
                        let pelny_rok = (miesiac >= 21) ? 2000 + rok : 1900 + rok
-                       where (2020 - pelny_rok) >= 29
-                       orderby pelny_rok
+                       let age = 2020 - pelny_rok
+                       where age > 29
+                       orderby age descending
                        select new
                        {
-                           Imie = klient.FirstName,
                            Nazwisko = klient.LastName,
-                           RokUrodzenia = pelny_rok,
-                           Wiek = 2020 - pelny_rok,
-                           Pesel = klient.PESEL
+                           Imie = klient.FirstName,
+                           Wiek = age
                        };
 
-        foreach(var item in zadanie2)
+        foreach (var item in zadanie2)
         {
             Console.WriteLine($"{item.Nazwisko} {item.Imie} {item.Wiek}");
         }
@@ -66,15 +69,15 @@ public class Program {
         Console.WriteLine("Provided:");
 
         var zadanie3 = (from klient in database.Customers
-                        join zamowienie in database.Orders on klient.CustomerId equals zamowienie.CustomerId into zamowieniaKlienta
-                        where zamowieniaKlienta.Any()
-                        let pierwszaData = zamowieniaKlienta.Min(z => z.Date)
-                        orderby pierwszaData // ascending
+                        join zamowienie in database.Orders on klient.CustomerId equals zamowienie.CustomerId into powiazaneZamowienia
+                        where powiazaneZamowienia.Any() // JESLI KOLEKCJA JEST PUSTA!!!
+                        let pierwszeZamowienie = powiazaneZamowienia.Min(x => x.Date)
+                        orderby pierwszeZamowienie
                         select new
                         {
-                            Imie = klient.FirstName,
                             Nazwisko = klient.LastName,
-                            PierwszeZamowienie = pierwszaData
+                            Imie = klient.FirstName,
+                            PierwszeZamowienie = pierwszeZamowienie
                         }).Take(3);
 
         foreach (var item in zadanie3)
@@ -94,9 +97,15 @@ public class Program {
         Console.WriteLine("****** Question 4 ******");
         Console.WriteLine("Provided:");
 
+        // jesli zamowieniaProduktu jest puste, to Sum nie rzuca wyjatku (ani Count)
+        // jesli Min, Max lub Average i pusta kolekcja, to rzutujemy na typ nullowalny
+        // double? srednia = oceny.Average(o => (double?)o.Score); // zwróci null, gdy brak ocen
+        // Srednia = srednia ?? 0.0,   // jeśli było null (brak ocen), podstawiasz 0.0 (albo zostawiasz samo 'srednia')
+        // np. let srednia = ocenyFilmu.Average(o => (double?)o.Score)
+        // dla group by nie ma tego problemu, pusta kolekcja sie nie utworzy
         var zadanie4 = (from produkt in database.Products
-                        join op in database.OrderProducts on produkt.ProductId equals op.ProductId into zamowieniaProduktu
-                        let sumaSztuk = zamowieniaProduktu.Sum(z => z.Quantity)
+                        join zamowienie in database.OrderProducts on produkt.ProductId equals zamowienie.ProductId into zamowieniaProduktu
+                        let sumaSztuk = zamowieniaProduktu.Sum(x => x.Quantity)
                         orderby sumaSztuk descending
                         select new
                         {
@@ -117,7 +126,8 @@ public class Program {
         Console.WriteLine("Pen 10");
         Console.WriteLine("Monitor 5");
 
-        // 5. For each person, determine the total amount they spent in the store (taking into account the discount available to people with a loyalty card).
+        // 5. For each person, determine the total amount they spent in the store
+        // (taking into account the discount available to people with a loyalty card).
         // List the customers in alphabetical order by surname, then first name.
         Console.WriteLine();
         Console.WriteLine("****** Question 5 ******");
@@ -172,6 +182,32 @@ public class Program {
                            Nazwisko = klient.LastName,
                            WydanaKwota = kwotaKoncowa
                        };
+
+        /*
+        var wydatkiBezZnizki = from zamowienieProduktu in database.OrderProducts
+                               join produkt in database.Products on zamowienieProduktu.ProductId equals produkt.ProductId
+                               join zamowienie in database.Orders on zamowienieProduktu.OrderId equals zamowienie.OrderId
+                               group produkt.Price * zamowienieProduktu.Quantity by zamowienie.CustomerId into g
+                               select new
+                               {
+                                   CustomerId = g.Key,
+                                   Kwota = g.Sum()
+                               };
+
+        var zadanie5 = from klient in database.Customers
+                       join sumaWydatkow in wydatkiBezZnizki on klient.CustomerId equals sumaWydatkow.CustomerId into powiazaneWydatki
+                       join karta in database.LoyaltyCards on klient.CustomerId equals karta.CustomerId into powiazaneKarty
+                       let sumaZnizek = powiazaneKarty.Sum(x => x.Discount)
+                       let sumaWydatkow = powiazaneWydatki.Sum(x => x.Kwota)
+                       let wydatkiZeZnizka = (1 - sumaZnizek) * sumaWydatkow
+                       orderby klient.LastName, klient.FirstName
+                       select new
+                       {
+                           Nazwisko = klient.LastName,
+                           Imie = klient.FirstName,
+                           WydanaKwota = wydatkiZeZnizka
+                       };
+        */
 
         foreach (var item in zadanie5)
         {
