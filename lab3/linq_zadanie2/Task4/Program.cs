@@ -18,16 +18,14 @@ public class Program {
         Console.WriteLine("Provided:");
         Console.WriteLine($"--------------");
 
-        var distribs = from users in database.Users
-                       group users.UserID by users.Age into g
-                       let count = g.Count()
+        var distribs = from widz in database.Users
+                       group widz.UserID by widz.Age into g
                        orderby g.Key ascending
                        select new
                        {
                            Age = g.Key,
-                           Count = count
+                           Count = g.Count()
                        };
-
 
         foreach (var dist in distribs)
         {
@@ -37,7 +35,8 @@ public class Program {
         Console.WriteLine($"--------------");
 
         // Question 2
-        // What is the earliest year of a watched movie in the individual groups determined by age and gender — sort the results ascending by the earliest year.
+        // What is the earliest year of a watched movie in the individual groups determined by age and gender.
+        // Sort the results ascending by the earliest year.
         Console.WriteLine("Expected:");
         Console.WriteLine($"--------------");
         Console.WriteLine("50 F  - 1919\r\n25 M  - 1919\r\n35 F  - 1919\r\n18 M  - 1919\r\n35 M  - 1919\r\n25 F  - 1919\r\n45 M  - 1919\r\n" +
@@ -46,14 +45,23 @@ public class Program {
         Console.WriteLine("Provided:");
         Console.WriteLine($"--------------");
 
-        var distribs2 = from user in database.Users
-                        join rating in database.Ratings on user.UserID equals rating.UserID
+        var distribs2 = from rating in database.Ratings
+                        join movie in database.Movies on rating.MovieID equals movie.MovieID
+                        join user in database.Users on rating.UserID equals user.UserID
+                        group movie.Year by new { user.Age, user.Gender } into g
+                        let earliestYear = g.Min()
+                        orderby earliestYear
+                        select new
+                        {
+                            GenderAge = g.Key,
+                            MinYear = earliestYear
+                        };
 
         foreach (var dist in distribs2)
         {
             Console.WriteLine($"{dist.GenderAge.Age} {dist.GenderAge.Gender}  - {dist.MinYear} ");
         }
-        
+
         Console.WriteLine($"--------------");
 
         // Question 3
@@ -67,13 +75,21 @@ public class Program {
         Console.WriteLine("Provided:");
         Console.WriteLine($"--------------");
 
-        /*
-        var genres = ... your solution here 
+        var genres = from movie in database.Movies
+                     from genre in movie.Genres.Split('|')
+                     group movie by genre into g
+                     let genreCount = g.Count()
+                     orderby g.Key
+                     select new
+                     {
+                         Name = g.Key,
+                         Count = genreCount
+                     };
 
         foreach (var genre in genres) {
             Console.WriteLine($"{genre.Name} {genre.Count}");
         }
-        */
+        
         Console.WriteLine($"--------------");
 
         // Question 4
@@ -90,13 +106,22 @@ public class Program {
         Console.WriteLine("Provided:");
         Console.WriteLine($"--------------");
 
-        /*
-        var remakes = ... your solution here 
+        var remakes = (from movie in database.Movies
+                       group movie by movie.Title into g
+                       where g.Count() >= 2 // g.Select(m => m.Year).Distinct().Count() >= 2 (jesli 2 filmy sa z tego samego roku)
+                       from m in g.OrderBy(x => x.Year)
+                       select new
+                       {
+                           MovieID = m.MovieID,
+                           Title = g.Key,
+                           Year = m.Year,
+                           Genres = m.Genres
+                       }).Take(14);
 
         foreach (var remake in remakes) {
             Console.WriteLine($"{remake.MovieID} {remake.Title} {remake.Year} {remake.Genres} ");
         }
-        */
+        
         Console.WriteLine($"--------------");
 
 
@@ -114,13 +139,22 @@ public class Program {
         Console.WriteLine("Provided:");
         Console.WriteLine($"--------------");
 
-        /*
-        var distribs5 = ... your solution here 
+        var distribs5 = (from rating in database.Ratings
+                        group rating by rating.MovieID into g
+                        join movie in database.Movies on g.Key equals movie.MovieID // dolaczam to po stworzeniu g!!!
+                        where g.Count() >= 100
+                        let averageRating = g.Average(x => x.Rating)
+                        orderby averageRating descending
+                        select new
+                        {
+                            Title = movie.Title,
+                            AverageRating = averageRating
+                        }).Take(20);
         
         foreach (var dist in distribs5) {
-            Console.WriteLine($"{dist.Title} {dist.AverageRating}");
+            Console.WriteLine($"{dist.Title} {dist.AverageRating:F2}");
         }
-        */
+        
         Console.WriteLine($"--------------");
 
     }
