@@ -415,7 +415,7 @@ Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w
 
 Słówko `yield` sprawia po prostu, że podpinasz swoją zewnętrzną pętlę `foreach` (w `Main`) bezpośrednio pod wewnętrzną pętlę `for` (w `T2`) i kręcą się one na zmianę, sztuka po sztuce.
 
-**Rekurencyjne chodzenie po drzewie InOrder**
+### Rekurencyjne chodzenie po drzewie InOrder
 
 Ten zapis działa jak **przekaźnik (rura)** między poziomami rekurencji — ponieważ w C# pojedyncze `yield return` oddaje zawsze **tylko jeden element typu `T**`, a wywołanie `InOrder(left)` zwraca cały strumień (`IEnumerable<T>`).
 
@@ -445,11 +445,11 @@ private IEnumerable<T> InOrder(int index)
 4. **`InOrder(3)`** (liść `3`):
 * Wywołuje `InOrder(7)` $\rightarrow$ `Exists(7)` jest `false` $\rightarrow$ `yield break` (pętla kończy się po 0 obrotach).
 * Dochodzi do własnego **`yield return _nodes[3]`** i wyrzuca wartość **`3`** poziom wyżej.
-5. **Powrót w górę (przekazywanie):**
+5. **Powrót w górę** (przekazywanie):
 * `InOrder(1)` łapie tę `3` do swojej zmiennej `v` i natychmiast podaje ją dalej przez swoje `yield return v`.
 * `InOrder(0)` łapie tę samą `3` do swojej zmiennej `v` i podaje ją do `Program.cs` przez swoje `yield return v`.
 * **`Program.cs` wypisuje `3**`.
-6. **Następny krok (`MoveNext()` w `Program.cs`):**
+6. **Następny krok** (`MoveNext()` w `Program.cs`):
 * Wywołanie schodzi z powrotem aż do `InOrder(3)`, które idzie w prawo (`InOrder(8)` $\rightarrow$ `yield break`) i **kończy pracę**.
 * Wtedy pętla `foreach (var v in InOrder(3))` wewnątrz `InOrder(1)` się kończy, więc `InOrder(1)` przechodzi do kolejnej linijki: **`yield return _nodes[1]`** — i teraz przez `InOrder(0)` wędruje do `Program.cs` liczba **`5`**.
 
