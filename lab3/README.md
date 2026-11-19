@@ -439,7 +439,7 @@ private IEnumerable<T> InOrder(int index)
 
 **Co dzieje się krok po kroku na przykładzie z zadania (`10`, lewe dziecko `5`, jego lewe dziecko `3`):**
 
-1. **Zewnętrzny `foreach` w `Program.cs**` prosi drzewo o **pierwszy element** (`MoveNext()`).
+1. **Zewnętrzny `foreach` w `Program.cs`** prosi drzewo o **pierwszy element** (`MoveNext()`).
 2. **`InOrder(0)`** (korzeń `10`) wchodzi w swoje `foreach (var v in InOrder(1))` i **zatrzymuje się** w oczekiwaniu na wartość od `InOrder(1)`.
 3. **`InOrder(1)`** (węzeł `5`) wchodzi w swoje `foreach (var v in InOrder(3))` i również **zatrzymuje się**, czekając na `InOrder(3)`.
 4. **`InOrder(3)`** (liść `3`):
