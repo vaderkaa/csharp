@@ -398,7 +398,6 @@ Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w
 * **[Main]** Pętla kręci się dalej i krzyczy: *"Daj drugi!"*
 * **[T2]** Maszyna się odwiesza. Dodaje do swojego wewnętrznego zegara 2 minuty, a do wartości dodaje 0,2. Robi drugi obieg pętli `for` i skleja: `Termometr, 20.2, 12:02`. Wypluwa przez `yield return` i znowu **zamarza**.
 
-
 * **[Main]** Program bierze wynik i wypisuje: `Czujnik: Termometr, Wynik: 20.2, Czas: 12:02`.
 
 **KROK 4: "Daj trzeci!" (Obieg 3)**
@@ -412,10 +411,47 @@ Kiedy procesor czyta linijkę `var mojeOdczyty = T2.Repeat(...)`, funkcja `T2` w
 * **[Main]** Pętla krzyczy: *"Daj czwarty!"*
 * **[T2]** Maszyna się odwiesza, ale widzi, że limit `count` wynosił 3. Pętla `for` w maszynie dobiegła końca. Maszyna wyłącza się całkowicie i mówi pętli w `Main`: *"Koniec, taśma pusta"*.
 
-
 * **[Main]** Zewnętrzny `foreach` kończy działanie. Program idzie dalej.
 
 Słówko `yield` sprawia po prostu, że podpinasz swoją zewnętrzną pętlę `foreach` (w `Main`) bezpośrednio pod wewnętrzną pętlę `for` (w `T2`) i kręcą się one na zmianę, sztuka po sztuce.
+
+**Rekurencyjne chodzenie po drzewie InOrder**
+
+Ten zapis działa jak **przekaźnik (rura)** między poziomami rekurencji — ponieważ w C# pojedyncze `yield return` oddaje zawsze **tylko jeden element typu `T**`, a wywołanie `InOrder(left)` zwraca cały strumień (`IEnumerable<T>`).
+
+```csharp
+private IEnumerable<T> InOrder(int index)
+{
+    if (!Exists(index))
+        yield break;
+
+    var (left, right) = GetChildrenIndices(index);
+
+    foreach (var v in InOrder(left))
+        yield return v;
+
+    yield return _nodes[index];
+
+    foreach (var v in InOrder(right))
+        yield return v;
+}
+```
+
+**Co dzieje się krok po kroku na przykładzie z zadania (`10`, lewe dziecko `5`, jego lewe dziecko `3`):**
+
+1. **Zewnętrzny `foreach` w `Program.cs**` prosi drzewo o **pierwszy element** (`MoveNext()`).
+2. **`InOrder(0)`** (korzeń `10`) wchodzi w swoje `foreach (var v in InOrder(1))` i **zatrzymuje się** w oczekiwaniu na wartość od `InOrder(1)`.
+3. **`InOrder(1)`** (węzeł `5`) wchodzi w swoje `foreach (var v in InOrder(3))` i również **zatrzymuje się**, czekając na `InOrder(3)`.
+4. **`InOrder(3)`** (liść `3`):
+* Wywołuje `InOrder(7)` $\rightarrow$ `Exists(7)` jest `false` $\rightarrow$ `yield break` (pętla kończy się po 0 obrotach).
+* Dochodzi do własnego **`yield return _nodes[3]`** i wyrzuca wartość **`3`** poziom wyżej.
+5. **Powrót w górę (przekazywanie):**
+* `InOrder(1)` łapie tę `3` do swojej zmiennej `v` i natychmiast podaje ją dalej przez swoje `yield return v`.
+* `InOrder(0)` łapie tę samą `3` do swojej zmiennej `v` i podaje ją do `Program.cs` przez swoje `yield return v`.
+* **`Program.cs` wypisuje `3**`.
+6. **Następny krok (`MoveNext()` w `Program.cs`):**
+* Wywołanie schodzi z powrotem aż do `InOrder(3)`, które idzie w prawo (`InOrder(8)` $\rightarrow$ `yield break`) i **kończy pracę**.
+* Wtedy pętla `foreach (var v in InOrder(3))` wewnątrz `InOrder(1)` się kończy, więc `InOrder(1)` przechodzi do kolejnej linijki: **`yield return _nodes[1]`** — i teraz przez `InOrder(0)` wędruje do `Program.cs` liczba **`5`**.
 
 # Nullowalność
 
