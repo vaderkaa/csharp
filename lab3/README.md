@@ -615,3 +615,11 @@ foreach (var klucz in slownik.Keys.ToList()) {
 ```
 
 Dzięki `.ToList()` robisz sobie "zdjęcie" wszystkich naklejek przed rozpoczęciem pracy. Pętla czyta z tego ksera, więc główna szafka jest całkowicie odblokowana i możesz na niej wykonywać dowolne operacje.
+
+# LINQ
+
+Zawsze zaczynasz od `from x in dc.NazwaSlownika.Values`.
+
+Jeśli pole ID ma w sobie pytajnik (`string?`, np. `DeliveryCourierId`, `DestinationLockerId`), przed joinem dopisujesz `where x.ToId != null`.
+
+Jeśli polecenie mówi **„Dla każdego X…”** (np. dla każdego nadawcy, dla każdego kuriera), a w danych może być ktoś z zerem rekordów, robisz `join ... into g` zamiast zwykłego `join` lub `group by`.
