@@ -79,7 +79,6 @@ countdown.Run();
 // Wypinamy funkcję z gniazdka Finished (teraz gniazdko znowu jest puste)
 countdown.Finished -= OnFinished; 
 
-// Poniższa linijka da błąd kompilacji, bo jesteśmy na zewnątrz klasy Countdown
-// i nie wolno nam ręcznie naciskać spustu zdarzenia:
+// Poniższa linijka da błąd kompilacji, bo jesteśmy na zewnątrz klasy Countdown i nie wolno nam ręcznie naciskać spustu zdarzenia:
 // countdown.Finished(countdown, EventArgs.Empty);
 ```
