@@ -1,10 +1,12 @@
-### Skąd rozwiązywane są ścieżki względne?
+# Skąd rozwiązywane są ścieżki względne?
 
 Katalog pliku wykonywalnego (`AppContext.BaseDirectory`) = miejsce na dysku, gdzie fizycznie siedzi plik `.exe`.
 
 Bieżący katalog roboczy (`Directory.GetCurrentDirectory()`) = folder, w którym otworzyłeś konsolę/terminal w momencie kliknięcia `Enter`. To do niego doklejane są ścieżki względne.
 
-### Delegaty i zdarzenia
+# Delegaty i zdarzenia
+
+### Wytłumaczenie przykładu z tutoriala
 
 ```csharp
 // =========================================================================
@@ -81,4 +83,90 @@ countdown.Finished -= OnFinished;
 
 // Poniższa linijka da błąd kompilacji, bo jesteśmy na zewnątrz klasy Countdown i nie wolno nam ręcznie naciskać spustu zdarzenia:
 // countdown.Finished(countdown, EventArgs.Empty);
+```
+
+`required` – przy tworzeniu obiektu (`new Product { ... }`) kompilator zmusi Cię do podania nazwy (inaczej będzie błąd kompilacji).
+
+`init` – nazwę można ustawić tylko w momencie tworzenia obiektu. Później nie da się jej już zmienić (jest tylko do odczytu).
+
+### Schemat
+
+```csharp
+// 0. DANE ZDARZENIA (tworzysz tylko dla zdarzenia, które przesyła dane)
+public class StatusChangedEventArgs : EventArgs
+{
+    public string NewStatus { get; }
+    public StatusChangedEventArgs(string newStatus) => NewStatus = newStatus;
+}
+
+// 1. WYDAWCA (schemat łączący zdarzenie z danymi i bez danych + własne add/remove)
+public class Worker
+{
+    // === WARIANT A: ZDARZENIE Z DANYMI (EventHandler<T>) ===
+    private EventHandler<StatusChangedEventArgs>? _statusChanged; // Prywatne pole delegatu
+
+    public event EventHandler<StatusChangedEventArgs>? StatusChanged
+    {
+        add
+        {
+            Console.WriteLine("Ktoś zasubskrybował StatusChanged");
+            _statusChanged += value;
+        }
+        remove
+        {
+            Console.WriteLine("Ktoś odsubskrybował StatusChanged");
+            _statusChanged -= value;
+        }
+    }
+
+    // === WARIANT B: ZDARZENIE BEZ DANYCH (zwykły EventHandler) ===
+    private EventHandler? _workFinished; // Prywatne pole delegatu
+
+    public event EventHandler? WorkFinished
+    {
+        add
+        {
+            Console.WriteLine("Ktoś zasubskrybował WorkFinished");
+            _workFinished += value;
+        }
+        remove
+        {
+            Console.WriteLine("Ktoś odsubskrybował WorkFinished");
+            _workFinished -= value;
+        }
+    }
+
+    // === LOGIKA KLASY ===
+    public void DoWork()
+    {
+        OnStatusChanged(new StatusChangedEventArgs("W trakcie"));
+        // ... właściwa praca ...
+        OnWorkFinished(EventArgs.Empty); // Brak danych -> zawsze EventArgs.Empty
+    }
+
+    // === METODY WYWOŁUJĄCE (Invoke wołamy na PRYWATNYCH POLACH, nie na nazwach eventów!) ===
+    protected virtual void OnStatusChanged(StatusChangedEventArgs e)
+    {
+        _statusChanged?.Invoke(this, e);
+    }
+
+    protected virtual void OnWorkFinished(EventArgs e)
+    {
+        _workFinished?.Invoke(this, e);
+    }
+}
+
+// 2. SPIĘCIE W PROGRAM.CS
+var worker = new Worker();
+
+void OnStatus(object? sender, StatusChangedEventArgs e) => Console.WriteLine($"Status: {e.NewStatus}");
+void OnFinished(object? sender, EventArgs e) => Console.WriteLine("Koniec pracy!");
+
+worker.StatusChanged += OnStatus;   // Wykona blok 'add'
+worker.WorkFinished += OnFinished;  // Wykona blok 'add'
+
+worker.DoWork();                    // Wyzwoli oba zdarzenia po kolei
+
+worker.StatusChanged -= OnStatus;   // Wykona blok 'remove'
+worker.WorkFinished -= OnFinished;  // Wykona blok 'remove'
 ```
