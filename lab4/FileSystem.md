@@ -1,4 +1,4 @@
-# System plików w C# (`System.IO`)
+# System plików i strumienie w C# (`System.IO`)
 
 ## 1. Ścieżki (`Path`)
 
@@ -36,10 +36,10 @@
   File.Move("b.txt", "c.txt", overwrite: true);
   ```
 
-* **`File.ReadAllLines` / `WriteAllLines` (oraz `ReadAllText`)** – szybki odczyt i zapis małych plików tekstowych w całości.
+* **`File.ReadAllLines` / `WriteAllLines` vs `File.ReadLines`** – `ReadAll*` ładuje cały plik do RAM-u; `ReadLines` czyta leniwie linia po linii (lepsze dla dużych plików).
   ```csharp
-  string[] lines = File.ReadAllLines("latest.manifest");
-  File.WriteAllLines("copy.manifest", lines);
+  int errors = File.ReadLines("log.txt").Count(l => l.Contains("Error"));
+  File.WriteAllLines("copy.manifest", File.ReadAllLines("latest.manifest"));
   ```
 
 * **Atrybuty, czas i uprawnienia Unix (`File`)** – odczyt/zapis znaczników czasu oraz trybu dostępu (`chmod` w .NET 7+).
@@ -100,23 +100,58 @@
 
 ---
 
-## 5. Strumienie (`Stream`) – duże pliki i `using`
+## 5. Strumienie (`Stream`, `FileStream`, `RandomAccess`)
 
-* **`FileStream`** – niskopoziomowy dostęp do bajtów; zawsze w `using`, żeby zwolnić uchwyt pliku w systemie.
+* **Możliwości (`CanRead`, `CanWrite`, `CanSeek`) i błędy** – w odróżnieniu od POSIX (`errno`), błędy zgłaszane są wyjątkami (`IOException`, `FileNotFoundException`).
   ```csharp
-  using FileStream fs = File.OpenRead("duzy_plik.bin");
-  byte[] hash = SHA256.HashData(fs);
+  using Stream s = new FileStream("lorem.txt", FileMode.Open);
+  Console.WriteLine($"Read: {s.CanRead}, Seek: {s.CanSeek}");
   ```
 
-* **`StreamReader` / `StreamWriter`** – czytanie i dopisywanie tekstu kawałek po kawałku (domyślnie UTF-8).
+* **Odczyt i zapis bajtów (`Read`, `ReadExactly`, `Write`)** – `Read` zwraca `0` na końcu strumienia; `ReadExactly` (.NET 7) gwarantuje wczytanie pełnego bufora.
   ```csharp
-  using var writer = new StreamWriter("log.txt", append: true);
-  writer.WriteLine("Nowy wpis w logu");
+  byte[] header = new byte[16];
+  s.ReadExactly(header); // rzuca EndOfStreamException, jeśli plik jest krótszy
+  ```
+
+* **Pozycjonowanie (`Seek`, `Position`) i `RandomAccess` (.NET 6)** – `Seek` przesuwa kursor; `RandomAccess` czyta/pisze pod offsetem bez zmiany pozycji (bezpieczne wielowątkowo).
+  ```csharp
+  using var handle = File.OpenHandle("lorem.txt", FileMode.Open);
+  int read = RandomAccess.Read(handle, header, fileOffset: 100);
+  ```
+
+* **Buforowanie, `Flush` i `using`** – `Flush(flushToDisk: true)` wymusza zapis na dysk (jak `fsync`); `using` automatycznie wywołuje `Dispose()` / `Close()`.
+  ```csharp
+  using FileStream fs = File.OpenWrite("out.bin"); // OpenOrCreate, NIE ucina pliku!
+  fs.Flush(flushToDisk: true);
   ```
 
 ---
 
-## 6. Nasłuchiwanie zmian na żywo (`FileSystemWatcher`)
+## 6. Dekoratory i adaptery strumieni
+
+* **Dekoratory (`BufferedStream`, `GZipStream`, `BrotliStream`)** – opakowują inny strumień, dodając buforowanie lub kompresję; `leaveOpen: true` nie zamyka strumienia pod spodem.
+  ```csharp
+  using var ms = new MemoryStream();
+  using (var gz = new GZipStream(ms, CompressionMode.Compress, leaveOpen: true))
+      gz.Write(new byte[1000]);
+  ```
+
+* **Adaptery tekstu (`StreamReader`, `StreamWriter`)** – czytają i piszą znaki/linie (domyślnie UTF-8 bez BOM; `StreamReader` rozpoznaje kodowanie po BOM).
+  ```csharp
+  using var sw = new StreamWriter(File.Create("out.txt"), Encoding.UTF8);
+  sw.WriteLine("zażółć gęślą jaźń");
+  ```
+
+* **Adaptery binarne (`BinaryReader`, `BinaryWriter`, `BinaryPrimitives`)** – serializują typy proste w formacie *little-endian*; do *big-endian* służy `BinaryPrimitives`.
+  ```csharp
+  using var bw = new BinaryWriter(File.Create("player.bin"));
+  bw.Write("Bob"); bw.Write(100); // zapisuje string (z długością) oraz Int32
+  ```
+
+---
+
+## 7. Nasłuchiwanie zmian na żywo (`FileSystemWatcher`)
 
 * **Konfiguracja i start** – monitoruje folder w tle na **osobnym wątku** (`inotify` na Linuxie); implementuje `IDisposable` (wymaga `using`).
   ```csharp
@@ -137,9 +172,9 @@
 
 ---
 
-## 7. Archiwa ZIP (`System.IO.Compression`)
+## 8. Archiwa ZIP (`System.IO.Compression`)
 
-* **`ZipFile.CreateFromDirectory` / `ExtractToDirectory`** – szybkie pakowanie i rozpakowywanie całych folderów (rzuca błąd, jeśli plik/folder docelowy już istnieje).
+* **`ZipFile.CreateFromDirectory` / `ExtractToDirectory`** – szybkie pakowanie i rozpakowywanie całych folderów (rzuca błąd, jeśli cel już istnieje).
   ```csharp
   ZipFile.CreateFromDirectory("my_files", "archive.zip");
   ZipFile.ExtractToDirectory("archive.zip", "extracted_files");
@@ -151,7 +186,7 @@
   zip.CreateEntryFromFile("nowy.txt", "folder/nowy.txt");
   ```
 
-* **`ZipArchiveEntry` (`Open`, `ExtractToFile`, `Delete`)** – operacje na pojedynczym pliku wewnątrz archiwum (czytanie strumieniem, wypakowanie lub usunięcie).
+* **`ZipArchiveEntry` (`Open`, `ExtractToFile`, `Delete`)** – operacje na pojedynczym pliku wewnątrz archiwum.
   ```csharp
   ZipArchiveEntry? entry = zip.GetEntry("folder/nowy.txt");
   entry?.ExtractToFile("wypakowany.txt", overwrite: true);
