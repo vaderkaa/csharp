@@ -9,6 +9,7 @@ public class BackupSummary(IReadOnlyList<FileChange> changes)
     public int Deleted => Changes.Count(c => c.Kind == ChangeKind.Deleted);
     public int Unchanged => Changes.Count(c => c.Kind == ChangeKind.Unchanged);
 
+    // Console.WriteLine(e.Summary) wypisuje na ekran dzieki ToString()
     public override string ToString() =>
         $"New: {New}, modified: {Modified}, deleted: {Deleted}, unchanged: {Unchanged}";
 }

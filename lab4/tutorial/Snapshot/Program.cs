@@ -55,18 +55,18 @@ internal class Program // klasa widoczna wszedzie wewnatrz obecnego projektu
 
         if (maxSizeKb.HasValue)
         {
-            long maxBytes = maxSizeKb.Value * 1024;
-            engine.FileFound += (_, e) =>
+            long maxBytes = maxSizeKb.Value * 1024; // przelicza KB na B, bo e.File.Size jest w bajtach
+            engine.FileFound += (_, e) => // dodaje subskrybenta
             {
                 if (e.File.Size > maxBytes)
                 {
-                    e.Cancel = true;
+                    e.Cancel = true; // plik zostaje pominiety
                     Console.WriteLine($"Skipping {e.File.RelativePath} ({e.File.Size.ToHumanSize()} > {maxBytes.ToHumanSize()})");
                 }
             };
         }
 
-        engine.Run();
+        engine.Run(); // dopiero odpalam
 
         string latestManifestPath = Path.Combine(repository, "latest.manifest");
         Console.WriteLine($"Manifest saved to {latestManifestPath}");
@@ -92,6 +92,7 @@ internal class Program // klasa widoczna wszedzie wewnatrz obecnego projektu
                 case ["backup", var source, var repository]:
                     return Backup(source, repository);
                 case ["backup", var source, var repository, var maxSize] when long.TryParse(maxSize, out long maxSizeKb):
+                    // argumenty zawsze sa stringiem, wiec trzeba sparsowac na long
                     return Backup(source, repository, maxSizeKb);
                 default:
                     PrintUsage();

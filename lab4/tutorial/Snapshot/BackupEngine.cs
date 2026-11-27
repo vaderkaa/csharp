@@ -6,6 +6,7 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
     public string RepositoryDirectory { get; } = repositoryDirectory;
     // nie tworze publicznej wlasciwosci dla ignorePatterns, ale zostanie ono zapamietane w klasie i bede mogla go uzywac
 
+    // LISTA SUBSKRYBENTOW
     // 4 zdarzenia
     // wywoływane dla każdego znalezionego pliku, przed jego przetworzeniem, subskrybent może wykluczyć plik z kopii zapasowej
     public event EventHandler<FileFoundEventArgs>? FileFound;
@@ -16,6 +17,8 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
     // wywoływane na końcu kopii zapasowej
     public event EventHandler<BackupCompletedEventArgs>? Completed;
 
+    // METODY WYZWALAJACE, KTORE SPRAWDZAJA CZY KTOS JEST NA LISCIE SUBSKRYBENTOW
+    // JESLI TAK, TO ODPALAJA WSZYSTKIE PODPIETE METODY Z LISTY SUBSKRYBENTOW
     protected virtual void OnFileFound(FileFoundEventArgs e) => FileFound?.Invoke(this, e);
     protected virtual void OnFileProcessed(FileProcessedEventArgs e) => FileProcessed?.Invoke(this, e);
     protected virtual void OnProgressChanged(BackupProgressEventArgs e) => ProgressChanged?.Invoke(this, e);
@@ -25,6 +28,7 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
     {
         // SKANOWANIE PLIKOW W MOIM FOLDERZE
         var scanner = new DirectoryScanner(SourceDirectory, ignorePatterns);
+        // mozna korzystac z ignorePatterns mimo, ze nie ma we wlasciwosci
         var scannedFiles = scanner.Scan()
                                   .OrderBy(f => f.RelativePath, StringComparer.Ordinal); // sortuje po sciezce wzglednej
 
@@ -34,6 +38,7 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
             var foundArgs = new FileFoundEventArgs(file);
             OnFileFound(foundArgs); // wywoluje lambdy z Program.cs
             // czyli subskrybentow, ktorzy zostali podpieci do zdarzenia FileFound w klasie BackupEngine
+            // wywoluje to na danych foundArgs
             // zapisuje sie w Program.cs engine.FileFound += lambda
             // jesli ktorys subskrybent ma w swojej logice Console.WriteLine to sie wypisze
 
@@ -57,7 +62,7 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
 
         foreach (FileEntry file in files)
         {
-            string hash = FileHasher.ComputeSha256(file.FullPath);
+            string hash = FileHasher.ComputeSha256(file.FullPath); // hashowanie
             var entry = new ManifestEntry(file.RelativePath, file.Size, hash);
             currentManifest.Add(entry); // dodaje do Manifest ManifestEntry czyli dodaje informacje o tym pliku do listy jakby
 
@@ -65,7 +70,9 @@ public class BackupEngine(string sourceDirectory, string repositoryDirectory, IR
             ChangeKind kind = previousManifest is null
                               ? ChangeKind.New
                               : previousManifest.Classify(entry); // porownujemy dzisiejszy plik z poprzednim i jak sie zmienil status
+            // is null chroni przed brakiem calego poprzedniego manifestu, a Classify sprawdza brak konkretnego pliku
 
+            // wszystkie manifesty sa RelativePath, zeby potem sie ladnie posortowalo
             changes.Add(new FileChange(file.RelativePath, kind));
             OnFileProcessed(new FileProcessedEventArgs(file, kind)); // wywolanie subskybentow zdarzenia po zupdateowaniu plikow
 
