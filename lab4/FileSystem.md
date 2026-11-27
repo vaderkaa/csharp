@@ -134,3 +134,31 @@
   ```csharp
   watcher.Error += (_, e) => Console.WriteLine(e.GetException().Message);
   ```
+
+---
+
+## 7. Archiwa ZIP (`System.IO.Compression`)
+
+* **`ZipFile.CreateFromDirectory` / `ExtractToDirectory`** – szybkie pakowanie i rozpakowywanie całych folderów (rzuca błąd, jeśli plik/folder docelowy już istnieje).
+  ```csharp
+  ZipFile.CreateFromDirectory("my_files", "archive.zip");
+  ZipFile.ExtractToDirectory("archive.zip", "extracted_files");
+  ```
+
+* **`ZipFile.Open` i `ZipArchive`** – otwiera archiwum w trybie `Read`, `Create` lub `Update` do pracy wpis po wpisie (`Entries`, `GetEntry`, `CreateEntryFromFile`).
+  ```csharp
+  using ZipArchive zip = ZipFile.Open("archive.zip", ZipArchiveMode.Update);
+  zip.CreateEntryFromFile("nowy.txt", "folder/nowy.txt");
+  ```
+
+* **`ZipArchiveEntry` (`Open`, `ExtractToFile`, `Delete`)** – operacje na pojedynczym pliku wewnątrz archiwum (czytanie strumieniem, wypakowanie lub usunięcie).
+  ```csharp
+  ZipArchiveEntry? entry = zip.GetEntry("folder/nowy.txt");
+  entry?.ExtractToFile("wypakowany.txt", overwrite: true);
+  ```
+
+* **Asynchroniczne API ZIP (.NET 10)** – nieblokujące odpowiedniki (`CreateFromDirectoryAsync`, `OpenReadAsync`, `entry.OpenAsync`) z obsługą `await using`.
+  ```csharp
+  await using ZipArchive zip = await ZipFile.OpenReadAsync("archive.zip");
+  await zip.ExtractToDirectoryAsync("extracted_async");
+  ```
